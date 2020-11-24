@@ -22,9 +22,9 @@ colnames(df_ac)=c("States","Number")
 df_pc=df_pavement_info %>% filter(LAYER_TYPE=="PC") %>% group_by(STATE_CODE_EXP,SHRP_ID) %>% summarise(n_=n()) %>% group_by(STATE_CODE_EXP) %>% summarise(number=n())
 colnames(df_pc)=c("States","Number")
 
-geo_ac=gvisGeoChart(df_ac, "States", "Number",options=list(region="US", displayMode="regions", resolution="provinces",width=450, height=300))
+geo_ac=gvisGeoChart(df_ac, "States", "Number",options=list(title="Number of Asphalt pavements",region="US", displayMode="regions", resolution="provinces",width=450, height=300,colorAxis="{values:[1, 179],colors:[\'blue',\'red']}"))
 plot(geo_ac)
-geo_pc=gvisGeoChart(df_pc, "States", "Number",options=list(region="US", displayMode="regions", resolution="provinces",width=450, height=300))
+geo_pc=gvisGeoChart(df_pc, "States", "Number",options=list(title="Number of Concrete pavements",region="US", displayMode="regions", resolution="provinces",width=450, height=300,colorAxis="{values:[1, 100],colors:[\'blue',\'red']}"))
 plot(geo_pc)
 
 #Temperature data
@@ -32,7 +32,7 @@ plot(geo_pc)
 df_mera_shrp=read.csv("MERA_SHRP.csv",stringsAsFactors = FALSE)
 df_mera_temp_month=read.csv("MERRA_TEMP_MONTH.csv",stringsAsFactors = FALSE)
 df_mera_temp_month[,5]=1.8*df_mera_temp_month[,4]+32
-colnames(df_mera_temp_month)[5]="AT"
+colnames(df_mera_temp_month)[5]="Average Teperature"
 year=2001 #input from slider
 month=3 #input from slider
 df_mera_temp_month=inner_join(df_mera_temp_month %>% filter(YEAR==year & MONTH==month),df_mera_shrp,by="MERRA_ID")
@@ -41,8 +41,8 @@ df_mera_temp_month=df_mera_temp_month %>% filter(!(STATE_CODE_EXP %in%Out_of_US)
 df_mera_temp_month=df_mera_temp_month %>% mutate(LatLong=paste(LATITUDE,LONGITUDE,sep = ":"))
 df_mera_temp_month=df_mera_temp_month[,c(5,13,14)]
 
-geo_temperature=gvisGeoChart(df_mera_temp_month,"LatLong",colorvar ='AT',sizevar='ELEVATION',
-                             options=list(region="US",colors="['#0713f2', '#ed1109']"))
+geo_temperature=gvisGeoChart(df_mera_temp_month,"LatLong",colorvar ='Average Teperature',sizevar='ELEVATION',
+                             options=list(region="US",colorAxis="{values:[6, 78],colors:[\'blue',\'red']}"))
 plot(geo_temperature)
 
 #Traffic data
@@ -58,7 +58,7 @@ df_traffic_year=df_traffic_year %>% filter(!(STATE_CODE_EXP %in%Out_of_US))
 df_traffic_year=df_traffic_year %>% select(STATE_CODE_EXP,Lat,Long,ELEVATION,ESAL,YEAR)
 df_traffic_year=df_traffic_year %>% mutate(LatLong=paste(Lat,Long,sep=":"))
 geo_traffic=gvisGeoChart(df_traffic_year, "LatLong", colorvar='ESAL',sizevar='ELEVATION',
-                           options=list(region="US",resolution="provinces",colors="['#f5faf8', '#4d4f4c']"))
+                           options=list(region="US",resolution="provinces",colorAxis="{values:[0, 4000000],colors:[\'blue',\'red']}"))
 plot(geo_traffic)
 
 #Subgrade
@@ -80,15 +80,15 @@ df_IRI=df_IRI %>% group_by(STATE_CODE,SHRP_ID) %>% arrange(VISIT_DATE,CONSTRUCTI
 
 df_pavement_info_ac_only=df_pavement_info %>% filter(LAYER_TYPE=="AC") %>% group_by(STATE_CODE_EXP,SHRP_ID,CONSTRUCTION_NO) %>% summarise(ac_th=sum(REPR_THICKNESS))
 
-#Structure
+###Structure
 
 state_name=unique(df_pavement_info$STATE_CODE_EXP)
 layer_type=unique(df_pavement_info$LAYER_TYPE_EXP)
 construction_no=unique(df_pavement_info$CONSTRUCTION_NO)
 
-#plotting histogram for thickness
+###plotting histogram for thickness
 df_structure_ac=df_pavement_info %>% filter(STATE_CODE_EXP=="Texas" & CONSTRUCTION_NO==1 &LAYER_TYPE=="AC") %>% group_by(SHRP_ID) %>% summarise(Thickness=sum(REPR_THICKNESS))
-geo_plot_structure_ac=gvisHistogram(df_structure_ac,options=list(colors="['#f5160a']"))
+#geo_plot_structure_ac=gvisHistogram(df_structure_ac,options=list(colors="['#f5160a']"))
 
 df_structure_pc=df_pavement_info %>% filter(STATE_CODE_EXP=="Texas" & CONSTRUCTION_NO==1 &LAYER_TYPE=="PC") %>% group_by(SHRP_ID) %>% summarise(Thickness=sum(REPR_THICKNESS))
 geo_plot_structure_pc=gvisHistogram(df_structure_pc,options=list(colors="['#a3a8a4']"))
