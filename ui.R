@@ -26,7 +26,7 @@ shinyUI(dashboardPage(
               
               fluidRow(box(plotOutput("LayerDistributation"),height=500)),
               
-              fluidRow(box(selectInput("state2","State:",traffic_year_unique)),
+              fluidRow(box(selectInput("state2","State:",traffic_year_vector)),
                        box(selectInput("SHRP","Select Your Section ID:",SHRP_STATE)),
                        box(plotOutput("Traffic_year_growth"),height=500),
                        box(htmlOutput("Traffic_AC_Thickness",height=500)),

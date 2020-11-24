@@ -18,7 +18,7 @@ shinyServer(function(input, output){
     # show map for Average Temperature using googleVis
     output$AverageTemperature <- renderGvis({
         df_temperature_month_year=df_temperature %>% filter(YEAR==input$temperature_year_id & MONTH==input$temperature_month_id)
-        gvisGeoChart(df_mera_temp_month,"LatLong",colorvar ='Average Teperature',sizevar='ELEVATION',
+        gvisGeoChart(df_temperature_month_year,"LatLong",colorvar ='Average Teperature',sizevar='ELEVATION',
         options=list(region="US",colorAxis="{values:[6, 78],colors:[\'blue',\'red']}"))
     })
     
@@ -35,8 +35,8 @@ shinyServer(function(input, output){
     
     # show histogram for distributation of layer thickness
     output$LayerDistributation <- renderPlot({
-        df_structure=df_pavement_info %>% filter(STATE_CODE_EXP==input$state1,LAYER_TYPE==input$layer_type1) %>% group_by(SHRP_ID,LAYER_TYPE,CONSTRUCTION_NO) %>%
-        summarise(Thickness=sum(REPR_THICKNESS,na.rm = TRUE))
+        df_structure=df_pavement_info %>% filter(STATE_CODE_EXP==input$state1,LAYER_TYPE==input$layer_type1) %>% select(!STATE_CODE_EXP & !LAYER_NO & !LAYER_TYPE_EXP) %>%  
+        group_by(SHRP_ID,LAYER_TYPE,CONSTRUCTION_NO) %>% summarise(Thickness=sum(REPR_THICKNESS,na.rm = TRUE))
         bw=max(df_structure$Thickness)/input$bin1
         df_structure$CONSTRUCTION_NO=as.character(df_structure$CONSTRUCTION_NO)
         ggplot(df_structure,aes(x=Thickness,fill=CONSTRUCTION_NO))+
@@ -45,57 +45,31 @@ shinyServer(function(input, output){
     #show triffc year growth as a function of year
     output$Traffic_year_growth <- renderPlot({
         
-        df_traffic_state_shrp=df_traffic %>% filter(STATE_CODE_EXP==input$state2 & SHRP_ID==input$SHRP)
+        df_traffic_state_shrp=df_traffic %>% filter(STATE_CODE_EXP==input$state2 & SHRP_ID==input$SHRP) %>% select(!STATE_CODE & !STATE_CODE_EXP & !SHRP_ID)
         df_traffic_state_shrp$CONSTRUCTION_NO=as.character(df_traffic_state_shrp$CONSTRUCTION_NO)
-        ggplot(df_traffic_state_shrp,aes(x=YEAR,y=ANNUAL_ESAL_TREND))+geom_point(aes(fill=CONSTRUCTION_NO))+labs(title = "ESAL vs. Year")+xlab("Year")+ylab("ESAL")
+        ggplot(df_traffic_state_shrp,aes(x=YEAR,y=ESAL))+geom_point(aes(fill=CONSTRUCTION_NO))+labs(title = "ESAL vs. Year")+xlab("Year")+ylab("ESAL")
         
     })
     # show scater plot for ac layer as a function of traffic
     output$Traffic_AC_Thickness <-renderPlot({
         
-        df_traffic_shrp_=df_traffic %>% filter(STATE_CODE_EXP==input$state2 & SHRP_ID==input$SHRP) %>% group_by(CONSTRUCTION_NO) %>% summarise(min_ESAL=min(ANNUAL_ESAL_TREND),max_ESAL=max(ANNUAL_ESAL_TREND))
-        df_pavement_state_layer_shrp=df_pavement_info %>% filter(STATE_CODE_EXP==input$state2 & SHRP_ID==input$SHRP  & LAYER_TYPE=="AC") %>% group_by(CONSTRUCTION_NO) %>% summarise(st=sum(REPR_THICKNESS))
-        df_final=inner_join(df_pavement_state_layer_shrp,df_traffic_shrp_,by="CONSTRUCTION_NO")
+        df_traffic_shrp=df_traffic %>% filter(STATE_CODE_EXP==input$state2 & SHRP_ID==input$SHRP) %>% select(!STATE_CODE & !STATE_CODE_EXP & !SHRP_ID) %>% 
+        group_by(CONSTRUCTION_NO) %>% summarise(min_ESAL=min(ESAL),max_ESAL=max(ESAL))
+        df_pavement_state_layer_shrp=df_pavement_info %>% filter(STATE_CODE_EXP==input$state2 & SHRP_ID==input$SHRP  & LAYER_TYPE=="AC") %>% 
+        select(!STATE_CODE_EXP & !SHRP_ID & !LAYER_TYPE & !LAYER_NO & !LAYER_TYPE & !LAYER_TYPE_EXP) %>% group_by(CONSTRUCTION_NO) %>% summarise(st=sum(REPR_THICKNESS))
+        df_final=inner_join(df_pavement_state_layer_shrp,df_traffic_shrp,by="CONSTRUCTION_NO")
         ggplot(df_final)+geom_point(aes(x=st,y=min_ESAL,color='blue'))+geom_point(aes(x=st,y=max_ESAL,color='Red'))+labs(title = "ESAL vs. Thickness for Aspahlt")+xlab("Thickness (in)")+ylab("ESAL")
     })
     # show scater plot for PC layer as a function of traffic
     output$Traffic_PC_Thickness <-renderPlot({
         
-        df_traffic_shrp_=df_traffic %>% filter(STATE_CODE_EXP=="California" & SHRP_ID==7452) %>% group_by(CONSTRUCTION_NO) %>% summarise(min_ESAL=min(ANNUAL_ESAL_TREND),max_ESAL=max(ANNUAL_ESAL_TREND))
-        df_pavement_state_layer_shrp=df_pavement_info %>% filter(STATE_CODE_EXP=="California" & SHRP_ID==7452  & LAYER_TYPE=="PC") %>% group_by(CONSTRUCTION_NO) %>% summarise(st=sum(REPR_THICKNESS))
+        df_traffic_shrp_=df_traffic %>% filter(STATE_CODE_EXP==input$state2 & SHRP_ID==input$SHRP) %>% group_by(CONSTRUCTION_NO) %>% summarise(min_ESAL=min(ESAL),max_ESAL=max(ESAL))
+        df_pavement_state_layer_shrp=df_pavement_info %>% filter(STATE_CODE_EXP==input$state2 & SHRP_ID==input$SHRP  & LAYER_TYPE=="PC") %>% 
+        select(!STATE_CODE_EXP & !SHRP_ID & !LAYER_TYPE & !LAYER_NO & !LAYER_TYPE & !LAYER_TYPE_EXP) %>% group_by(CONSTRUCTION_NO) %>% summarise(st=sum(REPR_THICKNESS))
         df_final=inner_join(df_pavement_state_layer_shrp,df_traffic_shrp_,by="CONSTRUCTION_NO")
         ggplot(df_final)+geom_point(aes(x=st,y=min_ESAL,color='blue'))+geom_point(aes(x=st,y=max_ESAL,color='Red'))+labs(title = "ESAL vs. Thickness for Concrete")+xlab("Thickness (in)")+ylab("ESAL")
         
     })
-    
-    
-    
-    
-    
-    
-    
-    
-    # show data using DataTable
-    output$table <- DT::renderDataTable({
-        datatable(state_stat, rownames=FALSE) %>% 
-            formatStyle(input$selected, background="skyblue", fontWeight='bold')
-    })
-    
-    # show statistics using infoBox
-    output$maxBox <- renderInfoBox({
-        max_value <- max(state_stat[,input$selected])
-        max_state <- 
-            state_stat$state.name[state_stat[,input$selected] == max_value]
-        infoBox(max_state, max_value, icon = icon("hand-o-up"))
-    })
-    output$minBox <- renderInfoBox({
-        min_value <- min(state_stat[,input$selected])
-        min_state <- 
-            state_stat$state.name[state_stat[,input$selected] == min_value]
-        infoBox(min_state, min_value, icon = icon("hand-o-down"))
-    })
-    output$avgBox <- renderInfoBox(
-        infoBox(paste("AVG.", input$selected),
-                mean(state_stat[,input$selected]), 
-                icon = icon("calculator"), fill = TRUE))
 })
+    
+    
