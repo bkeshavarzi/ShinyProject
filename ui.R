@@ -9,8 +9,7 @@ shinyUI(dashboardPage(
     sidebarUserPanel("Data",image="https://pavementinteractive.org/wp-content/uploads/2008/07/Hma1.jpg"),
     sidebarMenu(
       menuItem("Big Picture", tabName = "general"  , icon = icon("road")),
-      menuItem("Structure"  , tabName = "structure", icon = icon("building-o")),
-      menuItem("Distress"   , tabName = "distress" , icon = icon("house-damage"))
+      menuItem("Structure"  , tabName = "structure", icon = icon("building-o"))
     )),
   dashboardBody(
     tags$head(
@@ -26,19 +25,20 @@ shinyUI(dashboardPage(
                       box(selectInput("traffic_year","Year For Traffic:",traffic_year_vector,selected = traffic_year_vector[1]),width=5)),
              fluidRow(box(htmlOutput("Traffic"),headerPanel("Traffic Volume"))),
              fluidRow(box(leafletOutput("SHRP")))),
+      
       tabItem(tabName = "structure",
+              
               fluidRow(box(selectInput("state1","State",state_name,selected = 'Texas',multiple = FALSE)),
                        box(selectInput("layer_type1","Type of Layer",layer_type,selected = 'AC',multiple = FALSE)),
                        box(sliderInput("bin1","Number of Bins:",min = 0,max = 10,value = 5))),
+              
               fluidRow(box(plotOutput("LayerDistributation"),height='auto')),
-              fluidRow(box(selectInput("state2","State for Traffic:",traffic_year_vector)),
-                       box(selectInput("SHRP","Select Your Section ID:",SHRP_STATE)),
-                       box(plotOutput("Traffic_year_growth")),
-                       box(plotOutput("Traffic_AC_Thickness")),
-                       box(htmlOutput("Traffic_PC_Thickness",height='auto'))
-                       ),
-      ),
-      tabItem(tabName = "distress", "Hello3")
+              
+              fluidRow(box(selectInput("state2","State for Traffic (AC):",traffic_state_vector)),
+                       box(selectInput("SHRP","Select Your Section ID (AC):",SHRP_STATE)),
+                       box(plotOutput("Traffic_year_growth"))),
+              fluidRow(box(plotOutput("Traffic_AC_Thickness")))
+      )
     )
   )
 )

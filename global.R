@@ -10,6 +10,7 @@ Out_of_US=c("Alberta","British Columbia","New Brunswick","Newfoundland","Nova Sc
 df_pavement_info=df_pavement_info %>% filter(!(STATE_CODE_EXP %in% Out_of_US))%>%select(STATE_CODE_EXP,SHRP_ID,CONSTRUCTION_NO,LAYER_NO,LAYER_TYPE,LAYER_TYPE_EXP,REPR_THICKNESS)
 df_pavement_SHRP=df_pavement_SHRP %>% filter(!(STATE_CODE_EXP %in% Out_of_US))%>% select(STATE_CODE_EXP,STATE_CODE,SHRP_ID,START_DATE,END_DATE) 
 df_pavement_info$LAYER_TYPE_EXP=str_replace(df_pavement_info$LAYER_TYPE_EXP,"layer","")
+df_pavement_info=df_pavement_info %>% filter(!is.na(REPR_THICKNESS))
 
 df_pavement_SHRP$START_DATE=as.Date(df_pavement_SHRP$START_DATE,"%m/%d/%Y")
 df_pavement_SHRP$END_DATE=as.Date(df_pavement_SHRP$END_DATE,"%m/%d/%Y")
@@ -55,9 +56,20 @@ df_traffic=df_traffic %>% filter(!(STATE_CODE_EXP %in% Out_of_US))
 df_traffic=inner_join(df_traffic,df_gps,by.x=c("STATE_CODE","SHRP_ID"),by.y=c("STATE_CODE","SHRP_ID"))
 df_traffic=df_traffic %>% mutate(LatLong=paste(LATITUDE,LONGITUDE,sep=":"))
 colnames(df_traffic)[6]="ESAL"
+
+df1=df_pavement_info %>% filter(LAYER_TYPE=="AC") %>% select(STATE_CODE_EXP,SHRP_ID,CONSTRUCTION_NO)
+df2=df_traffic %>% select(STATE_CODE_EXP,SHRP_ID,CONSTRUCTION_NO)
+df3=inner_join(df1,df2,by.x=c("STATE_CODE_EXP","SHRP_ID","CONSTRUCTION_NO"),by.y=c("STATE_CODE_EXP","SHRP_ID","CONSTRUCTION_NO")) %>% group_by(STATE_CODE_EXP,SHRP_ID,CONSTRUCTION_NO) %>% summarise(n_=n()) %>% select(!n_)
+traffic_state_vector=unique(df3$STATE_CODE_EXP)
+SHRP_STATE=unique(df3$SHRP_ID)
+
+df4=df_pavement_info %>% filter(LAYER_TYPE=="PC") %>% select(STATE_CODE_EXP,SHRP_ID,CONSTRUCTION_NO)
+df5=inner_join(df1,df2,by.x=c("STATE_CODE_EXP","SHRP_ID","CONSTRUCTION_NO"),by.y=c("STATE_CODE_EXP","SHRP_ID","CONSTRUCTION_NO")) %>% group_by(STATE_CODE_EXP,SHRP_ID,CONSTRUCTION_NO) %>% summarise(n_=n()) %>% select(!n_)
+traffic_state_vector_pc=unique(df3$STATE_CODE_EXP)
+SHRP_STATE_pc=unique(df3$SHRP_ID)
+
 traffic_year_vector=unique(df_traffic$YEAR)
-SHRP_STATE=unique(df_traffic$SHRP_ID)
- 
+
 ##IRI
 # 
 df_IRI=read.csv("IRI.csv",stringsAsFactors = FALSE)

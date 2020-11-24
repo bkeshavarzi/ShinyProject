@@ -2,15 +2,24 @@ library(shiny)
 library(googleVis)
 library(leaflet)
 
-shinyServer(function(input, output){
+shinyServer(function(input, output,session){
     
-    # show map for AC using googleVis
+    observe({
+        
+        month_option=unique(df_temperature %>% filter(YEAR==input$temperature_year_id) %>% select(MONTH))
+        layer_option=unique(df_pavement_info %>% filter(STATE_CODE_EXP==input$state1) %>% select(LAYER_TYPE_EXP))
+        
+        shrp_option=unique(df_traffic %>% filter(STATE_CODE_EXP==input$state2) %>% select(SHRP_ID))
+        updateSelectizeInput(session,"temperature_month_id",choices=month_option,selected = month_option[1])
+        updateSelectizeInput(session,"layer_type1",choices=layer_option,selected = layer_option[1])
+        updateSelectizeInput(session,"SHRP",choices=shrp_option,selected=shrp_option[1])
+
+    })
+
+     # show map for AC using googleVis
     output$ACPavements <- renderGvis({
         h=gvisGeoChart(df_ac, "States", "Number",options=list(region="US", displayMode="regions", resolution="provinces",
         width="auto", height="auto",colorAxis="{values:[1, 179],colors:[\'blue',\'red']}"))
-        # h$html$header="Number of Aspahlt Sections in the LTPP Database"
-        # h$html$footer=""
-        # plot(h)
     })
     
     # show map for PC using googleVis
@@ -48,7 +57,7 @@ shinyServer(function(input, output){
         bw=max(df_structure$Thickness)/input$bin1
         df_structure$CONSTRUCTION_NO=as.character(df_structure$CONSTRUCTION_NO)
         ggplot(df_structure,aes(x=Thickness,fill=CONSTRUCTION_NO))+
-            geom_histogram(binwidth=bw)+ylab(paste("Number of",input$layer_type1,"Layer",sep = " "))+scale_x_continuous(limits=c(0,max(df_structure$Thickness)))+
+            geom_histogram(binwidth=bw)+ylab(paste("Number of",input$layer_type1,"Layer",sep = " "))+scale_x_continuous(limits=c(min(df_structure$Thickness),max(df_structure$Thickness)))+
             xlab("Thickness (in)")
     })
     
@@ -57,7 +66,7 @@ shinyServer(function(input, output){
         
         df_traffic_state_shrp=df_traffic %>% filter(STATE_CODE_EXP==input$state2 & SHRP_ID==input$SHRP) %>% select(!STATE_CODE & !STATE_CODE_EXP & !SHRP_ID)
         df_traffic_state_shrp$CONSTRUCTION_NO=as.character(df_traffic_state_shrp$CONSTRUCTION_NO)
-        ggplot(df_traffic_state_shrp,aes(x=YEAR,y=ESAL))+geom_point(aes(fill=CONSTRUCTION_NO))+labs(title = "ESAL vs. Year")+xlab("Year")+ylab("ESAL")
+        ggplot(df_traffic_state_shrp,aes(x=YEAR,y=ESAL))+geom_point(aes(color=CONSTRUCTION_NO))+labs(title = "ESAL vs. Year")+xlab("Year")+ylab("ESAL")
         
     })
     
@@ -68,30 +77,9 @@ shinyServer(function(input, output){
         df_pavement_state_layer_shrp=df_pavement_info %>% filter(STATE_CODE_EXP==input$state2 & SHRP_ID==input$SHRP  & LAYER_TYPE=="AC") %>% 
             select(!STATE_CODE_EXP & !SHRP_ID & !LAYER_TYPE & !LAYER_NO & !LAYER_TYPE & !LAYER_TYPE_EXP) %>% group_by(CONSTRUCTION_NO) %>% summarise(st=sum(REPR_THICKNESS))
         df_final=inner_join(df_pavement_state_layer_shrp,df_traffic_shrp,by="CONSTRUCTION_NO")
-        ggplot(df_final)+geom_point(aes(x=st,y=min_ESAL,color='blue'))+geom_point(aes(x=st,y=max_ESAL,color='Red'))+labs(title = "ESAL vs. Thickness for Aspahlt")+xlab("Thickness (in)")+ylab("ESAL")
+        ggplot(df_final)+geom_point(aes(x=st,y=min_ESAL))+geom_point(aes(x=st,y=max_ESAL))+labs(title = "ESAL vs. Thickness for Aspahlt")+xlab("Thickness (in)")+ylab("ESAL")
     })
-    
-    # show scater plot for PC layer as a function of traffic
-    
-    output$Traffic_PC_Thickness <-renderPlot({
-        df_traffic_shrp_=df_traffic %>% filter(STATE_CODE_EXP==input$state2 & SHRP_ID==input$SHRP) %>% group_by(CONSTRUCTION_NO) %>% summarise(min_ESAL=min(ESAL),max_ESAL=max(ESAL))
-        df_pavement_state_layer_shrp=df_pavement_info %>% filter(STATE_CODE_EXP==input$state2 & SHRP_ID==input$SHRP  & LAYER_TYPE=="PC") %>% 
-            select(!STATE_CODE_EXP & !SHRP_ID & !LAYER_TYPE & !LAYER_NO & !LAYER_TYPE & !LAYER_TYPE_EXP) %>% group_by(CONSTRUCTION_NO) %>% summarise(st=sum(REPR_THICKNESS))
-        df_final=inner_join(df_pavement_state_layer_shrp,df_traffic_shrp_,by="CONSTRUCTION_NO")
-        ggplot(df_final)+geom_point(aes(x=st,y=min_ESAL,color='blue'))+geom_point(aes(x=st,y=max_ESAL,color='Red'))+labs(title = "ESAL vs. Thickness for Concrete")+xlab("Thickness (in)")+ylab("ESAL")
-        
-    })
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
 })
-    
+
     
