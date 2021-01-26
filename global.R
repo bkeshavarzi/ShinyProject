@@ -15,12 +15,15 @@ df_pavement_info=df_pavement_info %>% filter(!is.na(REPR_THICKNESS))
 df_pavement_SHRP$START_DATE=as.Date(df_pavement_SHRP$START_DATE,"%m/%d/%Y")
 df_pavement_SHRP$END_DATE=as.Date(df_pavement_SHRP$END_DATE,"%m/%d/%Y")
 index=substring(df_pavement_SHRP$END_DATE,7,10)=="2050"
-df_pavement_SHRP$END_DATE=str_replace(df_pavement_SHRP$END_DATE,"2050","2005")
- 
+##df_pavement_SHRP$END_DATE=str_replace(df_pavement_SHRP$END_DATE,"2050","2005")
+
+##duration for each section
+df_pavement_SHRP$duration=as.integer(substr(df_pavement_SHRP$END_DATE,1,4))-as.integer(substr(df_pavement_SHRP$START_DATE,1,4))
+##
 df_gps=read.csv('GPS.csv',stringsAsFactors = FALSE)[,c(1,2,3,4,5,9)]
 df_gps=df_gps %>% filter(!(STATE_CODE_EXP %in% Out_of_US))
 df_gps$ELEVATION=round(df_gps$ELEVATION,digits=2)
-df_gps=df_gps %>% mutate(tip=paste("SHRP Id is :",SHRP_ID,"\n","Elevation is:",ELEVATION,sep = " "))
+#df_gps=df_gps %>% mutate(tip=paste("SHRP Id is :",SHRP_ID,"\n","Elevation is:",ELEVATION,sep = " "))
  
 ##Find AC pavemetns
 df_ac=df_pavement_info %>% filter(LAYER_TYPE=="AC") %>% group_by(STATE_CODE_EXP,SHRP_ID) %>% summarise(n_=n()) %>% group_by(STATE_CODE_EXP) %>% summarise(Aspahlt_Sections=n())
@@ -34,12 +37,12 @@ colnames(df_pc)=c("States","Number")
 df_mera_shrp=read.csv("MERA_SHRP.csv",stringsAsFactors = FALSE)
 df_mera_temp_month=read.csv("MERRA_TEMP_MONTH.csv",stringsAsFactors = FALSE)
 df_mera_temp_month=df_mera_temp_month %>% select(!FREEZE_INDEX & !FREEZE_THAW)
-df_mera_temp_month=df_mera_temp_month %>% mutate(Tave=1.8*TEMP_AVG+32)
+df_mera_temp_month=df_mera_temp_month %>% mutate(Tave_F=1.8*TEMP_AVG+32)
 df_mera_temp_month=df_mera_temp_month %>% select(!TEMP_AVG & !TEMP_MEAN_AVG)
 colnames(df_mera_temp_month)[4]="Average_Temperature"
  
 df_temperature=inner_join(df_mera_shrp,df_gps,by.x=c("STATE_CODE","SHRP_ID"),by.y=c("STATE_CODE","SHRP_ID"))
-df_temperature=df_temperature %>% mutate(tip=paste("SHRP Id is:",as.character(SHRP_ID),"Elevation is:",as.character(ELEVATION),sep = " "))
+#df_temperature=df_temperature %>% mutate(tip=paste("SHRP Id is:",as.character(SHRP_ID),"Elevation is:",as.character(ELEVATION),sep = " "))
 df_temperature=inner_join(df_temperature,df_mera_temp_month,by="MERRA_ID")
 df_temperature=df_temperature %>% select(!MERRA_ID & !STATE_CODE & !SHRP_ID  & !ELEVATION)
 df_temperature$LATITUDE=round(df_temperature$LATITUDE,4)

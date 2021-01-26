@@ -3,12 +3,12 @@ library(shinydashboard)
 library(leaflet)
 
 shinyUI(dashboardPage(
-  dashboardHeader(title = "LTPP",titleWidth = "100px"),
+  dashboardHeader(title = "Long Term Pavement Performance (LTPP)",titleWidth = "420px"),
   dashboardSidebar(
     
     sidebarUserPanel("Data",image="https://pavementinteractive.org/wp-content/uploads/2008/07/Hma1.jpg"),
     sidebarMenu(
-      menuItem("Big Picture", tabName = "general"  , icon = icon("road")),
+      menuItem("Pavement Life Span", tabName = "general"  , icon = icon("heart-o")),
       menuItem("Structure"  , tabName = "structure", icon = icon("building-o"))
     )),
   dashboardBody(
