@@ -8,38 +8,49 @@ shinyUI(dashboardPage(
     
     sidebarUserPanel("Data",image="https://pavementinteractive.org/wp-content/uploads/2008/07/Hma1.jpg"),
     sidebarMenu(
-      menuItem("Pavement Life Span", tabName = "general"  , icon = icon("heart-o")),
-      menuItem("Structure"  , tabName = "structure", icon = icon("building-o"))
+      menuItem("Pavement Sections Database", tabName = "section_data"  , icon = icon("database")),
+      menuItem("Temperature"  , tabName = "temperature_data", icon = icon("thermometer-0")),
+      menuItem("Traffic",tabName = 'traffic_data',icon = icon('truck')),
+      menuItem('Performance',tabname='performance_data',icon=icon('chain-broken'))
     )),
+  
   dashboardBody(
     tags$head(
       tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")
     ),
+    
     tabItems(
-      tabItem(tabName = "general",
+      tabItem(tabName = "section_data",
               
-             fluidRow(box(htmlOutput("ACPavements"),headerPanel("Number of Aspahlt Sections in LTPP")),box(htmlOutput("PCPavements"),headerPanel("Number of Concrete Sections in LTPP"))),
-             fluidRow(box(selectInput("temperature_year_id","Year for Temperature Contour:",temperature_year_vector,selected =temperature_year_vector[1])),
-                      box(selectInput("temperature_month_id","Month for Temperature Contour:",temperature_month_vector))),
-             fluidRow(box(htmlOutput("AverageTemperature"), height = 'auto',width = 'auto',headerPanel("Average Temperature (F)")),
-                      box(selectInput("traffic_year","Year For Traffic:",traffic_year_vector,selected = traffic_year_vector[1]),width=5)),
-             fluidRow(box(htmlOutput("Traffic"),headerPanel("Traffic Volume"))),
-             fluidRow(box(leafletOutput("SHRP")))),
+             fluidRow(box(htmlOutput("thickness_histogram")),box(htmlOutput("duration_histogram")),box(htmlOutput('elevation_histogram')),box(htmlOutput('section_map'))),
+             
+             fluidRow(box(selectInput("state_section_data","State :",state_list,selected =state_list[1])),
+                      box(selectInput("layer_type_data","Layer Type :",temperature_month_vector))),
+             
+             fluidRow(box(sliderInput("thickness_histogram_slider",label=h3('Number of Bins for Thickness'),min=2,max=30,value=15)),
+                      box(sliderInput("duration_histogram_slider",label=h3('Number of Bins for Life'),min=2,max=20,value=10)),
+                      box(sliderInput("duration_histogram_slider",label=h3('Number of Bins for Elevation'),min=2,max=20,value=10)))),
+             
+             #fluidRow(box(htmlOutput("Traffic"),headerPanel("Traffic Volume"))),
+             #fluidRow(box(leafletOutput("SHRP")))),
       
-      tabItem(tabName = "structure",
+      tabItem(tabName = "temperature_data",
               
-              fluidRow(box(selectInput("state1","State",state_name,selected = 'Texas',multiple = FALSE)),
-                       box(selectInput("layer_type1","Type of Layer",layer_type,selected = 'AC',multiple = FALSE)),
-                       box(sliderInput("bin1","Number of Bins:",min = 0,max = 10,value = 5))),
+              fluidRow(box(htmlOutput("ave_temperature")),box(htmlOutput('ave_temperature_year')),box(htmlOutput('ave_temperature_year_month')),box(htmlOutput('ave_temperature_location'))),
               
-              fluidRow(box(plotOutput("LayerDistributation"),height='auto')),
+              fluidRow(box(selectInput("temperature_state","State :",temperature_state_list,selected = temperature_state_list[1],multiple = FALSE)),
+                       box(selectInput("temperature_year","Year :",temperature_year_list,selected = temperature_year_list[1],multiple = FALSE)),
+                       box(sliderInput("temperature_month","Month :",temperature_month_list,selected=temperature_month_list[1],multiple=FALSE)))),
+      
+      tabItem(tabName = 'traffic_data',
               
-              fluidRow(box(selectInput("state2","State for Traffic (AC):",traffic_state_vector)),
-                       box(selectInput("SHRP","Select Your Section ID (AC):",SHRP_STATE)),
-                       box(plotOutput("Traffic_year_growth"))),
-              fluidRow(box(plotOutput("Traffic_AC_Thickness")))
-      )
+              fluidRow(box(htmlOutput('ESAL_stat')),box(htmlOutput('ESAL_year')),box(htmlOutput('ESAL_map'))),
+              
+              fluidRow(box(selectInput("traffic_state",'State :',traffic_state,selected=traffic_state[1],multiple = FALSE)),
+                       
+                       box(selectInput('traffic_year','Year :',traffic_year,selected = traffic_year[1],multiple = TRUE)))),
+              
+              )
     )
   )
-)
 )
