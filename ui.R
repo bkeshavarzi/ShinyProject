@@ -30,9 +30,6 @@ shinyUI(dashboardPage(
              fluidRow(box(sliderInput("thickness_histogram_slider",label=h3('Number of Bins for Thickness'),min=2,max=30,value=15)),
                       box(sliderInput("duration_histogram_slider",label=h3('Number of Bins for Life'),min=2,max=20,value=10)),
                       box(sliderInput("duration_histogram_slider",label=h3('Number of Bins for Elevation'),min=2,max=20,value=10)))),
-             
-             #fluidRow(box(htmlOutput("Traffic"),headerPanel("Traffic Volume"))),
-             #fluidRow(box(leafletOutput("SHRP")))),
       
       tabItem(tabName = "temperature_data",
               
@@ -49,8 +46,18 @@ shinyUI(dashboardPage(
               fluidRow(box(selectInput("traffic_state",'State :',traffic_state,selected=traffic_state[1],multiple = FALSE)),
                        
                        box(selectInput('traffic_year','Year :',traffic_year,selected = traffic_year[1],multiple = TRUE)))),
+      
+      tabItem(tabname='IRI_data',
               
-              )
-    )
+              fluidRow(column(3,box(htmlOutput('IRI_time'))),column(3,box(htmlOutput('IRI_time_layer'))),column(3,box(htmlOutput('IRI_time_traffic'))),column(3,box(htmlOutput('IRI_time_temperature')))),
+              
+              fluidRow(column(3,box(selectInput('IRI_State','State :',IRI_state,selected = IRI_state[1],multiple = FALSE))),
+                       column(3,box(selectInput('IRI_layer_type','Layer Type :',IRI_layer_type,selected = IRI_layer_type[1],multiple = FALSE)))),
+              fluidrow(column(4,box(sliderInput('IRI_layer_thickness',label=h3('Thickness (in) :'),min=0,max=30,value=15))),
+                       column(4,box(sliderInput('IRI_layer_traffic',label=h3('Traffic(ESAL) :'),min=0,max=300000,value=150000))),
+                       column(2,box(verbatimTextOutput("min_temp_value"))),
+                       column(2,box(verbatimTextOutput("max_temp_value")))))
+             )
   )
+)
 )

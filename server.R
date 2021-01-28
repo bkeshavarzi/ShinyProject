@@ -6,6 +6,55 @@ shinyServer(function(input, output,session){
     
     observe({
         
+        
+        df_state_layer=df_pavement_info %>% filter(STATE_CODE_EXP==input$state_section_data&LAYER_TYPE==input$layer_type_data) %>% group_by(SHRP_ID,CN) %>% 
+            summarise(sum_=sum(REPR_THICKNESS)) 
+        
+        df_state_duration=df_pavement_SHRP %>% filter(STATE_CODE_EXP==input$state_section_data)
+        
+        df_gps_state=df_gps %>% filter(STATE_CODE_EXP==input$state_section_data)
+        
+        min_year=min(df_state_duration$syear)
+        max_year=max(df_state_duration$eyear)
+        
+        min_thickness=min(df_state_layer$sum_)
+        max_thickness=max(df_state_layer$sum_)
+        
+        max_duration=max(df_state_duration$duration)
+        min_duration=min(df_state_duration$duration)
+        
+        min_elevation=min(df_gps_state$ELEVATION)
+        max_elevation=max(df_gps_state$ELEVATION
+                          )
+        #plot for df_state_layer
+        
+          ggplot(aes(sum_,fill=CN))+
+          geom_histogram(position = "stack")+labs(title=paste(input$layer_type_data,'Thickness Distributation For',input$state_section_data,sep=' '),
+          subtitle = paste(as.character(min_year),as.character(max_year),sep='-'),caption='Data from LTPP',tag='Figure 1',x=paste(input$layer_type_data,'Layer Thickness (in)'),y='Frequency',colour = "CN")+ 
+          theme_bw()+scale_x_continuous(breaks = seq(min_thickness, max_thickness, 1))
+          
+        #plot for df_state_duration
+          
+          ggplot(df_state_duration,aes(x=duration))+geom_histogram(binwidth = 1)+labs(title=paste('Section Life Distributation','in',input$state_section_data,sep=' '),
+          subtitle = paste(as.character(min_year),as.character(max_year),sep='-'),
+          caption='Data from LTPP',tag='Figure 2',x='Section Life (Year)',y='Frequency')+
+          theme_bw()+scale_x_continuous(breaks = seq(min_duration,max_duration,1))
+        
+        #plot for df_gps_state
+          
+          ggplot(df_gps_state,aes(ELEVATION))+geom_histogram()+labs(title = paste('Section Elevation in',input$state_section_data,sep = ' '),
+          subtitle = paste(as.character(min_year),as.character(max_year),sep='-'),
+          caption='LTPP Data',tag='Figure 3',x='Elevation (ft)',y='Frequency')+
+          theme_bw()+scale_x_continuous(breaks = seq(min_elevation,max_elevation,10))
+          
+        #leaflet plot
+          
+          m=leaflet(df_gps_state) %>% addTiles() %>% addMarkers(lng=df_gps_state$LONGITUDE,lat=df_gps_state$LATITUDE) %>% addProviderTiles('Stamen.Terrain') %>% 
+              + addMeasure(position = 'bottomleft',primaryLengthUnit = 'feet',primaryAreaUnit = 'sqfeet')
+        
+        min_year=min(df$syear)
+        max_year=max(df$eyear)
+        
         month_option=unique(df_temperature %>% filter(YEAR==input$temperature_year_id) %>% select(MONTH))
         layer_option=unique(df_pavement_info %>% filter(STATE_CODE_EXP==input$state1) %>% select(LAYER_TYPE_EXP))
         
