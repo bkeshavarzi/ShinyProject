@@ -22,42 +22,44 @@ shinyUI(dashboardPage(
     tabItems(
       tabItem(tabName = "section_data",
               
-             fluidRow(box(htmlOutput("thickness_histogram")),box(htmlOutput("duration_histogram")),box(htmlOutput('elevation_histogram')),box(htmlOutput('section_map'))),
+             fluidRow(box(plotOutput("thickness_histogram")),box(plotOutput("duration_histogram")),box(plotOutput('elevation_histogram')),box(leafletOutput('section_map'))),
              
              fluidRow(box(selectInput("state_section_data","State :",state_list,selected =state_list[1])),
-                      box(selectInput("layer_type_data","Layer Type :",temperature_month_vector))),
+                      box(selectInput("layer_type_data","Layer Type :",layer_type_list,selected = layer_type_list[1]))),
              
-             fluidRow(box(sliderInput("thickness_histogram_slider",label=h3('Number of Bins for Thickness'),min=2,max=30,value=15)),
-                      box(sliderInput("duration_histogram_slider",label=h3('Number of Bins for Life'),min=2,max=20,value=10)),
-                      box(sliderInput("duration_histogram_slider",label=h3('Number of Bins for Elevation'),min=2,max=20,value=10)))),
+             fluidRow(column(4,sliderInput("thickness_histogram_slider",label=h3('Number of Bins for Thickness'),min=2,max=30,value=15)),
+                      column(4,sliderInput("duration_histogram_slider",label=h3('Number of Bins for Life'),min=2,max=20,value=10)),
+                      column(4,sliderInput("elevation_histogram_slider",label=h3('Number of Bins for Elevation'),min=2,max=20,value=10))),
+             fluidRow(column(6,DT::dataTableOutput("thickness_table")),
+                      column(6,DT::dataTableOutput("life_table"))))))))
       
-      tabItem(tabName = "temperature_data",
+      #tabItem(tabName = "temperature_data",
               
-              fluidRow(box(htmlOutput("ave_temperature")),box(htmlOutput('ave_temperature_year')),box(htmlOutput('ave_temperature_year_month')),box(htmlOutput('ave_temperature_location'))),
+              #fluidRow(box(htmlOutput("ave_temperature")),box(htmlOutput('ave_temperature_year')),box(htmlOutput('ave_temperature_year_month')),box(htmlOutput('ave_temperature_location'))),
               
-              fluidRow(box(selectInput("temperature_state","State :",temperature_state_list,selected = temperature_state_list[1],multiple = FALSE)),
-                       box(selectInput("temperature_year","Year :",temperature_year_list,selected = temperature_year_list[1],multiple = FALSE)),
-                       box(sliderInput("temperature_month","Month :",temperature_month_list,selected=temperature_month_list[1],multiple=FALSE)))),
+              #fluidRow(box(selectInput("temperature_state","State :",temperature_state_list,selected = temperature_state_list[1],multiple = FALSE)),
+                       #box(selectInput("temperature_year","Year :",temperature_year_list,selected = temperature_year_list[1],multiple = FALSE)),
+                       #box(sliderInput("temperature_month","Month :",temperature_month_list,selected=temperature_month_list[1],multiple=FALSE)))),
       
-      tabItem(tabName = 'traffic_data',
+      #tabItem(tabName = 'traffic_data',
               
-              fluidRow(box(htmlOutput('ESAL_stat')),box(htmlOutput('ESAL_year')),box(htmlOutput('ESAL_map'))),
+              #fluidRow(box(htmlOutput('ESAL_stat')),box(htmlOutput('ESAL_year')),box(htmlOutput('ESAL_map'))),
               
-              fluidRow(box(selectInput("traffic_state",'State :',traffic_state,selected=traffic_state[1],multiple = FALSE)),
+              #fluidRow(box(selectInput("traffic_state",'State :',traffic_state,selected=traffic_state[1],multiple = FALSE)),
                        
-                       box(selectInput('traffic_year','Year :',traffic_year,selected = traffic_year[1],multiple = TRUE)))),
+                       #box(selectInput('traffic_year','Year :',traffic_year,selected = traffic_year[1],multiple = TRUE)))),
       
-      tabItem(tabname='IRI_data',
+      #tabItem(tabname='IRI_data',
               
-              fluidRow(column(3,box(htmlOutput('IRI_time'))),column(3,box(htmlOutput('IRI_time_layer'))),column(3,box(htmlOutput('IRI_time_traffic'))),column(3,box(htmlOutput('IRI_time_temperature')))),
+              #fluidRow(column(3,box(htmlOutput('IRI_time'))),column(3,box(htmlOutput('IRI_time_layer'))),column(3,box(htmlOutput('IRI_time_traffic'))),column(3,box(htmlOutput('IRI_time_temperature')))),
               
-              fluidRow(column(3,box(selectInput('IRI_State','State :',IRI_state,selected = IRI_state[1],multiple = FALSE))),
-                       column(3,box(selectInput('IRI_layer_type','Layer Type :',IRI_layer_type,selected = IRI_layer_type[1],multiple = FALSE)))),
-              fluidrow(column(4,box(sliderInput('IRI_layer_thickness',label=h3('Thickness (in) :'),min=0,max=30,value=15))),
-                       column(4,box(sliderInput('IRI_layer_traffic',label=h3('Traffic(ESAL) :'),min=0,max=300000,value=150000))),
-                       column(2,box(verbatimTextOutput("min_temp_value"))),
-                       column(2,box(verbatimTextOutput("max_temp_value")))))
-             )
-  )
-)
-)
+              #fluidRow(column(3,box(selectInput('IRI_State','State :',IRI_state,selected = IRI_state[1],multiple = FALSE))),
+                       #column(3,box(selectInput('IRI_layer_type','Layer Type :',IRI_layer_type,selected = IRI_layer_type[1],multiple = FALSE)))),
+              #fluidrow(column(4,box(sliderInput('IRI_layer_thickness',label=h3('Thickness (in) :'),min=0,max=30,value=15))),
+                       #column(4,box(sliderInput('IRI_layer_traffic',label=h3('Traffic(ESAL) :'),min=0,max=300000,value=150000))),
+                       #column(2,box(verbatimTextOutput("min_temp_value"))),
+                       #column(2,box(verbatimTextOutput("max_temp_value")))))
+             #)
+  #)
+#)
+#)
