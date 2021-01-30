@@ -10,12 +10,12 @@ shinyServer(function(input, output,session){
         layer_type_list_updated=unique(df_pavement_info %>% filter(STATE_CODE_EXP==input$state_section_data) %>% select(LAYER_TYPE))
         updateSelectizeInput(session,"layer_type_data",choices=layer_type_list_updated,selected = layer_type_list_updated[1])
         
-        temperature_year_list_modified=sort(unique(df_temperature %>% filter(STATE_CODE_EXP==input$temperature_state) %>% select(YEAR)),decreasing = FALSE)
+        temperature_year_list_modified=sort(unique((df_temperature %>% filter(STATE_CODE_EXP==input$temperature_state) %>% select(YEAR))[,1]),decreasing = FALSE)
         updateSelectInput(session,"temperature_year",choices = temperature_year_list_modified,selected = temperature_year_list_modified[1])
         
-        temperature_month_number_list_modified=sort(unique(df_temperature %>% filter(STATE_CODE_EXP==input$temperature_state&YEAR==input$temperature_year)),decreasing = FALSE)
-        x=temperature_month_list[temperature_month_number_list_modified]
-        updateSelectInput(session,"temperature_month",choices = x,selected = x[1])
+         # temperature_month_number_list_modified=sort(unique((df_temperature %>% filter(STATE_CODE_EXP==input$temperature_state&YEAR==input$temperature_year) %>% select(MONTH))[,1]),decreasing = FALSE)
+         # x=temperature_month_list[temperature_month_number_list==temperature_month_number_list_modified]
+         # updateSelectInput(session,"temperature_month",choices = x,selected = x[1])
     })
     
     # show histogram for thickness
@@ -95,53 +95,79 @@ shinyServer(function(input, output,session){
     }))
     
     # show ave temp
-    # output$ave_temperature <- renderPlot({
-    #     
-    #     df_ave_temperature_year=df_temperature %>% filter(STATE_CODE_EXP==input$temperature_state) %>% group_by(YEAR) %>% summarise(temp_ave=mean(Tave_F))
-    #     ggplot(df_ave_temperature_year,aes(x=YEAR,y=temp_ave))+geom_point(color='red',size=2)+
-    #     labs(title=paste('Annual Average Temperature for',input$temperature_state,sep = ' '),
-    #     caption=('Data from LTPP'),tag='Figure 1',x='Year',y='Temperature (F)')+theme_bw()
-    #     
-    # })
+     output$ave_temperature <- renderPlot({
+         
+         df_ave_temperature_year=df_temperature %>% filter(STATE_CODE_EXP==input$temperature_state) %>% group_by(YEAR) %>% summarise(temp_ave=mean(Tave_F))
+         
+         min_temp_10=min(df_ave_temperature_year$temp_ave)
+         max_temp_10=max(df_ave_temperature_year$temp_ave)
+         
+         ggplot(df_ave_temperature_year)+geom_point(aes(x=YEAR,y=temp_ave),color='red',size=5)+geom_line(aes(x=YEAR,y=temp_ave),color='blue')+
+         labs(title=paste('Annual Average Temperature for',input$temperature_state,sep = ' '),
+         caption=('Data from LTPP'),tag='Figure 1',x='Year',y='Temperature (F)')+theme_bw()+scale_x_continuous(breaks = seq(min(df_ave_temperature_year$YEAR),max(df_ave_temperature_year$YEAR),3))+
+        
+         theme(axis.text.x = element_text(face="bold", color="#993333",size=12))+theme(axis.text.y = element_text(face="bold", color="#993333",size=12))+
+         theme(axis.title = element_text(size = 14,color='#121111',face='bold'))
+         
+     })
     # 
     # #show SHRP for all states
-    # output$ave_temperature_year <- renderPlot({
-    #     
-    #     x=sort(df_temperature %>% filter(STATE_CODE_EXP==input$temperature_state,YEAR==input$temperature_year) %>% select(MONTH),decreasing = FALSE)
-    #     x_name=temperature_month_list[x]
-    #     
-    #     df_ave_temperature_year_month=df_temperature %>% filter(STATE_CODE_EXP==input$temperature_state,YEAR==input$temperature_year) %>% group_by(MONTH,SHRP_ID) %>% 
-    #     summarise(temp_ave=mean(Tave_F)) %>% arrange(ascend(MONTH))
-    #     ggplot(df_ave_temperature_year_month,aes(x=MONTH,y=temp_ave))+geom_point(color='red',size=2)+
-    #     labs(title=paste('Annual Average Temperature for',input$temperature_state,sep = ' '),
-    #     caption=('Data from LTPP'),tag='Figure 2',x='Month',y='Temperature (F)')+scale_x_discrete(labels=x_name)+theme_bw()
-    #     
-    # })
-    # 
-    # output$ave_temp_shrp_month <- renderPlot({
-    #     
-    #   df=df_temperature %>% filter(STATE_CODE_EXP==input$temperature_state,YEAR==input$temperature_year)
-    #   df_min=df %>% group_by(MONTH) %>% summarise(min_F=min(Tave_F))
-    #   df_max=df %>% group_by(MONTH) %>% summarise(max_F=max(Tave_F))
-    #   
-    #   ggplot()+geom_smooth(aes(x=df$MONTH,y=df$Tave_F),color='black')+
-    #   geom_smooth(aes(x=df_min$MONTH,y=df_min$min_F),color='blue',se=FALSE)+
-    #   geom_smooth(aes(x=df_max$MONTH,y=df_max$max_F),color='red',se=FALSE)
-    # })
-    # 
+     output$ave_temperature_year <- renderPlot({
+         
+         x=sort(unique((df_temperature %>% filter(STATE_CODE_EXP==input$temperature_state,YEAR==input$temperature_year) %>% select(MONTH))[,1]),decreasing = FALSE)
+         x_name=temperature_month_list[x]
+         
+         df_ave_temperature_year_month=df_temperature %>% filter(STATE_CODE_EXP==input$temperature_state,YEAR==input$temperature_year) %>% group_by(MONTH,SHRP_ID) %>% 
+         summarise(temp_ave=mean(Tave_F)) %>% arrange(MONTH)
+         df_ave=df_ave_temperature_year_month %>% group_by(MONTH) %>% summarise(T_ave=mean(temp_ave))
+         ggplot(df_ave_temperature_year_month)+geom_boxplot(aes(x=MONTH,y=temp_ave,group=MONTH),fill='#2616b8',color='black')+geom_line(data=df_ave,aes(x=MONTH,y=T_ave),color='red',linetype='dashed')+
+         labs(title=paste('Annual Average Temperature for',input$temperature_state,'Year :',input$temperature_year,sep = ' '),
+         caption=('Data from LTPP'),tag='Figure 2',x='Month',y='Temperature (F)')+scale_x_discrete(limits=temperature_month_list)+theme_bw()+
+         theme(axis.text.x = element_text(face="bold", color="#993333",size=12))+theme(axis.text.y = element_text(face="bold", color="#993333",size=12))+
+         theme(axis.title = element_text(size = 14,color='#121111',face='bold')) 
+         
+     })
+    
+     output$ave_temp_shrp_month <- renderPlot({
+       
+       selected_month=temperature_month_number_list[temperature_month_list==input$temperature_month]  
+       df=df_temperature %>% filter(STATE_CODE_EXP==input$temperature_state&YEAR==input$temperature_year&MONTH==selected_month)
+       y_seq=seq(min(df$ELEVATION),max(df$ELEVATION),by=15)
+       
+       ggplot(data=df,aes(x=df$ELEVATION,y=df$Tave_F))+geom_point(color='red',size=5)+geom_smooth(color='blue',se=TRUE,linetype='dashed',method = 'lm')+
+       labs(title=paste('Temperature versus Elevation for State:',input$temperature_state,'Year:',input$temperature_year,'Month:',input$temperature_month,sep=' '),
+       caption=('Data from LTPP'),tag='Figure 3',x='Elevation (ft)',y='Temperature (F)')+theme_bw()+
+           theme(axis.text.x = element_text(face="bold", color="#993333",size=12))+theme(axis.text.y = element_text(face="bold", color="#993333",size=12))+
+           theme(axis.title = element_text(size = 14,color='#121111',face='bold'))
+     })
+    
     # # show map
-    # output$ave_temperature_location <- renderLeaflet({
-    #     
-    #     df=df_temperature %>% filter(STATE_CODE_EXP==input$temperature_state&YEAR==input$temperature_year&MONTH=input$temperature_month) %>% 
-    #     select(SHRP_ID,LATITUDE,LONGITUDE,ELEVATION,Tave_F) %>% group_by(SHRP_ID,LATITUDE,LONGITUDE,ELEVATION) %>% summarise(temp_ave=mean(Tave_F))
-    #     max_temp=max(df$temp_ave)
-    #     min_temp=min(df$temp_ave)
-    #     temp_bin=seq(min_temp,max_temp,input$temperature_slider)
-    #     qpal <- colorBin("YlOrRd", domain = df$temp_ave, bins = temp_bin)
-    #     
-    #     leaflet(df) %>% addTiles() %>% addCircles(lng=~LONGITUDE,lat=~LATITUDE,color= ~qpal(temp_ave)) %>% 
-    #     addLegend("bottomright", pal = qpal, values = ~temp_ave)
-    # })
+     
+      output$ave_temperature_location <- renderLeaflet({
+          
+          selected_month=temperature_month_number_list[temperature_month_list==input$temperature_month]  
+          df=df_temperature %>% filter(STATE_CODE_EXP==input$temperature_state&YEAR==input$temperature_year&MONTH==selected_month)
+          
+          leaflet(df) %>% addTiles() %>% addMarkers(lng=df$LONGITUDE,lat=df$LATITUDE) %>% addProviderTiles('OpenTopoMap') %>% 
+              addMeasure(position = 'bottomleft',primaryLengthUnit = 'feet',primaryAreaUnit = 'sqfeet')
+          
+      })
+      
+      output$temperature_table1 <- DT::renderDataTable(DT::datatable({
+        df_ave_temperature_year=df_temperature %>% filter(STATE_CODE_EXP==input$temperature_state) %>% group_by(YEAR) %>% summarise(Average_Temperature=round(mean(Tave_F),1))
+        df_ave_temperature_year
+      }))
+      
+      output$temperature_table2 <- DT::renderDataTable(DT::datatable({
+        x=sort(unique((df_temperature %>% filter(STATE_CODE_EXP==input$temperature_state,YEAR==input$temperature_year) %>% select(MONTH))[,1]),decreasing = FALSE)
+        x_name=temperature_month_list[x]
+        
+        df_ave_temperature_year_month=df_temperature %>% filter(STATE_CODE_EXP==input$temperature_state,YEAR==input$temperature_year) %>% group_by(MONTH,SHRP_ID,ELEVATION) %>% 
+        summarise(temp_ave=mean(Tave_F)) %>% arrange(MONTH)
+        df_ave=df_ave_temperature_year_month %>% group_by(MONTH,SHRP_ID,ELEVATION) %>% summarise(Average_Temperature=round(mean(temp_ave),1))
+        df_ave
+        
+      }))
     
     #show triffc year growth as a function of year
     #output$Traffic_year_growth <- renderPlot({
