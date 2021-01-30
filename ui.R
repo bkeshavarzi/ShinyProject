@@ -21,8 +21,7 @@ shinyUI(dashboardPage(
     
     tabItems(
       tabItem(tabName = "section_data",
-              
-             fluidRow(box(plotOutput("thickness_histogram")),box(plotOutput("duration_histogram")),box(plotOutput('elevation_histogram')),box(leafletOutput('section_map'))),
+          
              
              fluidRow(box(selectInput("state_section_data","State :",state_list,selected =state_list[1])),
                       box(selectInput("layer_type_data","Layer Type :",layer_type_list,selected = layer_type_list[1]))),
@@ -30,16 +29,22 @@ shinyUI(dashboardPage(
              fluidRow(column(4,sliderInput("thickness_histogram_slider",label=h3('Number of Bins for Thickness'),min=2,max=30,value=15)),
                       column(4,sliderInput("duration_histogram_slider",label=h3('Number of Bins for Life'),min=2,max=20,value=10)),
                       column(4,sliderInput("elevation_histogram_slider",label=h3('Number of Bins for Elevation'),min=2,max=20,value=10))),
+             
+             fluidRow(box(plotOutput("thickness_histogram")),box(plotOutput("duration_histogram")),box(plotOutput('elevation_histogram')),box(leafletOutput('section_map'))),
+             
              fluidRow(column(6,DT::dataTableOutput("thickness_table")),
                       column(6,DT::dataTableOutput("life_table"))))))))
       
       #tabItem(tabName = "temperature_data",
               
-              #fluidRow(box(htmlOutput("ave_temperature")),box(htmlOutput('ave_temperature_year')),box(htmlOutput('ave_temperature_year_month')),box(htmlOutput('ave_temperature_location'))),
+              #fluidRow(column(3,selectInput("temperature_state","State :",temperature_state_list,selected = temperature_state_list[1],multiple = FALSE))))))))
+                       #column(3,selectInput("temperature_year","Year :",temperature_year_list,selected = temperature_year_list[1],multiple = FALSE)),
+                       #column(3,selectInput("temperature_month","Month :",temperature_month_list,selected=temperature_month_list[1],multiple=FALSE)),
+                       #column(3,sliderInput('temperature_slider',label=h3('Number of Bins for Temperature Map :'),min=2,max=10,value=5))))))))
               
-              #fluidRow(box(selectInput("temperature_state","State :",temperature_state_list,selected = temperature_state_list[1],multiple = FALSE)),
-                       #box(selectInput("temperature_year","Year :",temperature_year_list,selected = temperature_year_list[1],multiple = FALSE)),
-                       #box(sliderInput("temperature_month","Month :",temperature_month_list,selected=temperature_month_list[1],multiple=FALSE)))),
+              #fluidRow(column(6,plotOutput("ave_temperature")),column(6,plotOutput('ave_temperature_year'))),
+              #fluidRow(column(6,plotOutput('ave_temp_shrp_month')),column(6,leafletOutput('ave_temperature_location')))))))
+
       
       #tabItem(tabName = 'traffic_data',
               

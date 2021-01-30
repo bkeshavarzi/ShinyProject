@@ -9,7 +9,13 @@ shinyServer(function(input, output,session){
         
         layer_type_list_updated=unique(df_pavement_info %>% filter(STATE_CODE_EXP==input$state_section_data) %>% select(LAYER_TYPE))
         updateSelectizeInput(session,"layer_type_data",choices=layer_type_list_updated,selected = layer_type_list_updated[1])
-          
+        
+        temperature_year_list_modified=sort(unique(df_temperature %>% filter(STATE_CODE_EXP==input$temperature_state) %>% select(YEAR)),decreasing = FALSE)
+        updateSelectInput(session,"temperature_year",choices = temperature_year_list_modified,selected = temperature_year_list_modified[1])
+        
+        temperature_month_number_list_modified=sort(unique(df_temperature %>% filter(STATE_CODE_EXP==input$temperature_state&YEAR==input$temperature_year)),decreasing = FALSE)
+        x=temperature_month_list[temperature_month_number_list_modified]
+        updateSelectInput(session,"temperature_month",choices = x,selected = x[1])
     })
     
     # show histogram for thickness
@@ -59,7 +65,7 @@ shinyServer(function(input, output,session){
         vec=round(seq(min_elevation,max_elevation,(max_elevation-min_elevation)/input$elevation_histogram_slider),1)
         ggplot(df_gps_state,aes(ELEVATION))+geom_histogram(bins = input$elevation_histogram_slider)+labs(title = paste('Section Elevation in',input$state_section_data,sep = ' '),
         subtitle = paste(as.character(min_year),as.character(max_year),sep='-'),
-        caption='LTPP Data',tag='Figure 3',x='Elevation (ft)',y='Frequency')+
+        caption='Data from LTPP',tag='Figure 3',x='Elevation (ft)',y='Frequency')+
         theme_bw()+scale_x_continuous(breaks = vec)
         
     })
@@ -88,30 +94,54 @@ shinyServer(function(input, output,session){
         df_gps_state
     }))
     
-    # show map for Traffic using googleVis
-    #output$Traffic <- renderGvis({
-        #df_traffic_year=df_traffic %>% filter(YEAR==input$traffic_year)
-        #gvisGeoChart(df_traffic_year, "LatLong", colorvar='ESAL',sizevar='ELEVATION',
-                     #options=list(region="US",resolution="provinces",colorAxis="{values:[0, 4000000],colors:[\'blue',\'red']}"))
-    #})
-    
-    #show SHRP for all states
-    #output$SHRP <- renderLeaflet({
-        #leaflet(df_gps) %>% addTiles() %>% addProviderTiles("OpenStreetMap.BZH") %>% addMarkers(lng=df_gps$LONGITUDE,lat=df_gps$LATITUDE,popup = df_gps$tip)
-    #})
-    
-    # show histogram for distributation of layer thickness
-    #output$LayerDistributation <- renderPlot({
-        #print(input$state1)
-        #print(input$layer_type1)
-        #df_structure=df_pavement_info %>% filter(STATE_CODE_EXP==input$state1,LAYER_TYPE_EXP==input$layer_type1) %>% select(!STATE_CODE_EXP & !LAYER_NO & !LAYER_TYPE_EXP) %>%  
-            #group_by(SHRP_ID,LAYER_TYPE,CONSTRUCTION_NO) %>% summarise(Thickness=sum(REPR_THICKNESS,na.rm = TRUE))
-        #bw=max(df_structure$Thickness)/input$bin1
-        #df_structure$CONSTRUCTION_NO=as.character(df_structure$CONSTRUCTION_NO)
-        #ggplot(df_structure,aes(x=Thickness,fill=CONSTRUCTION_NO))+
-            #geom_histogram(binwidth=bw)+ylab(paste("Number of",input$layer_type1,"Layer",sep = " "))+scale_x_continuous(limits=c(min(df_structure$Thickness),max(df_structure$Thickness)))+
-            #xlab("Thickness (in)")
-    #})
+    # show ave temp
+    # output$ave_temperature <- renderPlot({
+    #     
+    #     df_ave_temperature_year=df_temperature %>% filter(STATE_CODE_EXP==input$temperature_state) %>% group_by(YEAR) %>% summarise(temp_ave=mean(Tave_F))
+    #     ggplot(df_ave_temperature_year,aes(x=YEAR,y=temp_ave))+geom_point(color='red',size=2)+
+    #     labs(title=paste('Annual Average Temperature for',input$temperature_state,sep = ' '),
+    #     caption=('Data from LTPP'),tag='Figure 1',x='Year',y='Temperature (F)')+theme_bw()
+    #     
+    # })
+    # 
+    # #show SHRP for all states
+    # output$ave_temperature_year <- renderPlot({
+    #     
+    #     x=sort(df_temperature %>% filter(STATE_CODE_EXP==input$temperature_state,YEAR==input$temperature_year) %>% select(MONTH),decreasing = FALSE)
+    #     x_name=temperature_month_list[x]
+    #     
+    #     df_ave_temperature_year_month=df_temperature %>% filter(STATE_CODE_EXP==input$temperature_state,YEAR==input$temperature_year) %>% group_by(MONTH,SHRP_ID) %>% 
+    #     summarise(temp_ave=mean(Tave_F)) %>% arrange(ascend(MONTH))
+    #     ggplot(df_ave_temperature_year_month,aes(x=MONTH,y=temp_ave))+geom_point(color='red',size=2)+
+    #     labs(title=paste('Annual Average Temperature for',input$temperature_state,sep = ' '),
+    #     caption=('Data from LTPP'),tag='Figure 2',x='Month',y='Temperature (F)')+scale_x_discrete(labels=x_name)+theme_bw()
+    #     
+    # })
+    # 
+    # output$ave_temp_shrp_month <- renderPlot({
+    #     
+    #   df=df_temperature %>% filter(STATE_CODE_EXP==input$temperature_state,YEAR==input$temperature_year)
+    #   df_min=df %>% group_by(MONTH) %>% summarise(min_F=min(Tave_F))
+    #   df_max=df %>% group_by(MONTH) %>% summarise(max_F=max(Tave_F))
+    #   
+    #   ggplot()+geom_smooth(aes(x=df$MONTH,y=df$Tave_F),color='black')+
+    #   geom_smooth(aes(x=df_min$MONTH,y=df_min$min_F),color='blue',se=FALSE)+
+    #   geom_smooth(aes(x=df_max$MONTH,y=df_max$max_F),color='red',se=FALSE)
+    # })
+    # 
+    # # show map
+    # output$ave_temperature_location <- renderLeaflet({
+    #     
+    #     df=df_temperature %>% filter(STATE_CODE_EXP==input$temperature_state&YEAR==input$temperature_year&MONTH=input$temperature_month) %>% 
+    #     select(SHRP_ID,LATITUDE,LONGITUDE,ELEVATION,Tave_F) %>% group_by(SHRP_ID,LATITUDE,LONGITUDE,ELEVATION) %>% summarise(temp_ave=mean(Tave_F))
+    #     max_temp=max(df$temp_ave)
+    #     min_temp=min(df$temp_ave)
+    #     temp_bin=seq(min_temp,max_temp,input$temperature_slider)
+    #     qpal <- colorBin("YlOrRd", domain = df$temp_ave, bins = temp_bin)
+    #     
+    #     leaflet(df) %>% addTiles() %>% addCircles(lng=~LONGITUDE,lat=~LATITUDE,color= ~qpal(temp_ave)) %>% 
+    #     addLegend("bottomright", pal = qpal, values = ~temp_ave)
+    # })
     
     #show triffc year growth as a function of year
     #output$Traffic_year_growth <- renderPlot({
