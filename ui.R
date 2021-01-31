@@ -44,14 +44,16 @@ shinyUI(dashboardPage(
               fluidRow(column(6,plotOutput("ave_temperature")),column(6,plotOutput('ave_temperature_year'))),
               fluidRow(column(6,plotOutput('ave_temp_shrp_month')),column(6,leafletOutput('ave_temperature_location'))),
               fluidRow(column(6,DT::dataTableOutput("temperature_table1")),
-                       column(6,DT::dataTableOutput("temperature_table2"))))))))
+                       column(6,DT::dataTableOutput("temperature_table2")))),
 
       
-      #tabItem(tabName = 'traffic_data',
+      tabItem(tabName = 'traffic_data',
               
-              #fluidRow(box(htmlOutput('ESAL_stat')),box(htmlOutput('ESAL_year')),box(htmlOutput('ESAL_map'))),
+              fluidRow(column(2,selectInput('ESAL_state','State :',traffic_state,selected=traffic_state[1])),
+                       column(2,selectInput('ESAL_year','Year :',traffic_year,selected = traffic_year[1]))),
               
-              #fluidRow(box(selectInput("traffic_state",'State :',traffic_state,selected=traffic_state[1],multiple = FALSE)),
+              fluidRow(column(4,plotOutput("ESAL_year_plot")),column(4,plotOutput("ESAL_year_SHRP"))),
+              fluidRow(column(4,leafletOutput("ESAL_map")),column(4,DT::dataTableOutput('ESAL_table'))))))))
                        
                        #box(selectInput('traffic_year','Year :',traffic_year,selected = traffic_year[1],multiple = TRUE)))),
       

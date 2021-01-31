@@ -10,13 +10,37 @@ shinyServer(function(input, output,session){
         layer_type_list_updated=unique(df_pavement_info %>% filter(STATE_CODE_EXP==input$state_section_data) %>% select(LAYER_TYPE))
         updateSelectizeInput(session,"layer_type_data",choices=layer_type_list_updated,selected = layer_type_list_updated[1])
         
-        temperature_year_list_modified=sort(unique((df_temperature %>% filter(STATE_CODE_EXP==input$temperature_state) %>% select(YEAR))[,1]),decreasing = FALSE)
-        updateSelectInput(session,"temperature_year",choices = temperature_year_list_modified,selected = temperature_year_list_modified[1])
+        # temperature_year_list_modified=sort(unique((df_temperature %>% filter(STATE_CODE_EXP==input$temperature_state) %>% select(YEAR))[,1]),decreasing = FALSE)
+        # updateSelectInput(session,"temperature_year",choices = temperature_year_list_modified,selected = temperature_year_list_modified[1])
+        # 
+        # df=df_traffic %>% filter(STATE_CODE_EXP==input$ESAL_state)
+        # x=sort(unique(df$YEAR))
+        # updateSelectizeInput(session ,"ESAL_year",choices = x,selected = x[1])
+        
+        # ESAL_YEAR_SHRP_modified=sort(unique((df_traffic %>% filter(STATE_CODE_EXP==input$ESAL_state&YEAR==input$ESAL_year) %>% select(SHRP_ID))[,1]))
+        # updateSelectInput(session,"ESAL_SHRP",choices = ESAL_YEAR_SHRP_modified,selected = ESAL_YEAR_SHRP_modified[1])
         
          # temperature_month_number_list_modified=sort(unique((df_temperature %>% filter(STATE_CODE_EXP==input$temperature_state&YEAR==input$temperature_year) %>% select(MONTH))[,1]),decreasing = FALSE)
          # x=temperature_month_list[temperature_month_number_list==temperature_month_number_list_modified]
          # updateSelectInput(session,"temperature_month",choices = x,selected = x[1])
     })
+  
+  observe({
+    
+    
+     temperature_year_list_modified=sort(unique((df_temperature %>% filter(STATE_CODE_EXP==input$temperature_state) %>% select(YEAR))[,1]),decreasing = FALSE)
+     updateSelectInput(session,"temperature_year",choices = temperature_year_list_modified,selected = temperature_year_list_modified[1])
+     
+  })
+  
+  observe({
+    
+    
+    df=df_traffic %>% filter(STATE_CODE_EXP==input$ESAL_state)
+    x=sort(unique(df$YEAR))
+    updateSelectizeInput(session ,"ESAL_year",choices = x,selected = x[1])
+  
+  })
     
     # show histogram for thickness
     
@@ -169,14 +193,51 @@ shinyServer(function(input, output,session){
         
       }))
     
-    #show triffc year growth as a function of year
-    #output$Traffic_year_growth <- renderPlot({
+    #show traffic year growth as a function of year
+      
+    output$ESAL_year_plot <- renderPlot({
         
-        #df_traffic_state_shrp=df_traffic %>% filter(STATE_CODE_EXP==input$state2 & SHRP_ID==input$SHRP) %>% select(!STATE_CODE & !STATE_CODE_EXP & !SHRP_ID)
-        #df_traffic_state_shrp$CONSTRUCTION_NO=as.character(df_traffic_state_shrp$CONSTRUCTION_NO)
-        #ggplot(df_traffic_state_shrp,aes(x=YEAR,y=ESAL))+geom_point(aes(color=CONSTRUCTION_NO))+labs(title = "ESAL vs. Year")+xlab("Year")+ylab("ESAL")
+        df=df_traffic %>% filter(STATE_CODE_EXP==input$ESAL_state) %>% group_by(YEAR) %>% summarise(ave_ESAL=mean(ESAL))
+        ggplot(df)+geom_point(aes(x=YEAR,y=ave_ESAL),color='red',size=5)+geom_line(aes(x=YEAR,y=ave_ESAL),color='blue',linetype='dashed')+
+          labs(title = paste('Annual Average Traffic for State:',input$ESAL_state,sep=' '),x='Year',y='ESAL',caption = 'Data from LTPP',tag='Figure 1')+
+          theme_bw()+theme(axis.text.x = element_text(face="bold", color="#993333",size=12))+theme(axis.text.y = element_text(face="bold", color="#993333",size=12))+
+          theme(axis.title = element_text(size = 14,color='#121111',face='bold'))
         
-    #})
+    })
+    
+    output$ESAL_year_SHRP <- renderPlot({
+      
+      df=df_traffic %>% filter(STATE_CODE_EXP==input$ESAL_state&YEAR==input$ESAL_year)
+      df_ave=df_traffic %>% filter(STATE_CODE_EXP==input$ESAL_state&YEAR==input$ESAL_year) %>% group_by(SHRP_ID) %>% summarise(ave_ESAL=mean(ESAL)) 
+      ggplot(df)+geom_boxplot(aes(x=YEAR,y=ESAL,group=YEAR),fill='#2616b8',color='black')+labs(title = paste('ESAL data for State :',input$ESAL_state,'Year:',input$ESAL_year),x='Year',
+      y='ESAL',caption='Data from LTPP',tag='Figure 2')+
+      theme_bw()+theme(axis.text.x = element_text(face="bold", color="#993333",size=12))+theme(axis.text.y = element_text(face="bold", color="#993333",size=12))+
+      theme(axis.title = element_text(size = 14,color='#121111',face='bold'))
+      #+scale_x_discrete(limits=input$ESAL_year)
+      
+    })
+    
+    output$ESAL_map <- renderLeaflet({
+      
+      df=df_traffic %>% filter(STATE_CODE_EXP==input$ESAL_state&YEAR==input$ESAL_year)
+      leaflet(df) %>% addTiles() %>% addMarkers(lng=df$LONGITUDE,lat=df$LATITUDE) %>% addProviderTiles('Stamen.Terrain') %>% 
+        addMeasure(position = 'bottomleft',primaryLengthUnit = 'feet',primaryAreaUnit = 'sqfeet')
+      
+    })
+    
+    output$ESAL_table <- DT::renderDataTable(DT::datatable({
+      
+      df=df_traffic %>% filter(STATE_CODE_EXP==input$ESAL_state&YEAR==input$ESAL_year) %>% select(SHRP_ID,LATITUDE,LONGITUDE,ELEVATION,ESAL)
+      df
+      
+    }))
+    
+    
+    
+    
+    
+    
+    
     
     # show scater plot for ac layer as a function of traffic
     #output$Traffic_AC_Thickness <-renderPlot({

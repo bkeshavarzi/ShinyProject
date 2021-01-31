@@ -58,7 +58,7 @@ colnames(df_traffic)[6]="ESAL"
 
 traffic_state=sort(unique(df_traffic$STATE_CODE_EXP),decreasing = FALSE)
 traffic_year=sort(unique(df_traffic$YEAR),decreasing = FALSE)
-
+traffic_SHRP=sort(unique(df_traffic$SHRP_ID))
 
 
 df_IRI=read.csv("IRI.csv",stringsAsFactors = FALSE)
