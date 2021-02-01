@@ -53,21 +53,29 @@ shinyUI(dashboardPage(
                        column(2,selectInput('ESAL_year','Year :',traffic_year,selected = traffic_year[1]))),
               
               fluidRow(column(4,plotOutput("ESAL_year_plot")),column(4,plotOutput("ESAL_year_SHRP"))),
-              fluidRow(column(4,leafletOutput("ESAL_map")),column(4,DT::dataTableOutput('ESAL_table'))))))))
+              fluidRow(column(4,leafletOutput("ESAL_map")),column(4,DT::dataTableOutput('ESAL_table')))),
                        
                        #box(selectInput('traffic_year','Year :',traffic_year,selected = traffic_year[1],multiple = TRUE)))),
       
-      #tabItem(tabname='IRI_data',
+      tabItem(tabname='IRI_data',
               
-              #fluidRow(column(3,box(htmlOutput('IRI_time'))),column(3,box(htmlOutput('IRI_time_layer'))),column(3,box(htmlOutput('IRI_time_traffic'))),column(3,box(htmlOutput('IRI_time_temperature')))),
+              fluidRow(column(3,box(selectInput('IRI_state_1','Select State :',IRI_state,selected=IRI_state[1]))),
+                       column(3,box(selectInput('IRI_shrp','Select SHRP ID:',IRI_shrp,selected=IRI_shrp[1])))),
               
-              #fluidRow(column(3,box(selectInput('IRI_State','State :',IRI_state,selected = IRI_state[1],multiple = FALSE))),
-                       #column(3,box(selectInput('IRI_layer_type','Layer Type :',IRI_layer_type,selected = IRI_layer_type[1],multiple = FALSE)))),
-              #fluidrow(column(4,box(sliderInput('IRI_layer_thickness',label=h3('Thickness (in) :'),min=0,max=30,value=15))),
-                       #column(4,box(sliderInput('IRI_layer_traffic',label=h3('Traffic(ESAL) :'),min=0,max=300000,value=150000))),
-                       #column(2,box(verbatimTextOutput("min_temp_value"))),
-                       #column(2,box(verbatimTextOutput("max_temp_value")))))
-             #)
-  #)
-#)
-#)
+              fluidRow(column(4,box(plotOutput('IRI_time_plot')))),
+              
+              
+              fluidRow(column(3,box(selectInput('IRI_state_2','Select State :',IRI_state,selected=IRI_state[1])))),
+              
+              fluidRow(column(4,box(plotOutput('IRI-temp_plot'))),
+                       column(4,box(plotOutput('IRI_traffic_plot')))),
+                       
+              fluidrow(column(4,box(plotOutput('IRI_Ac_thickness_plot'))),
+                       column(4,box(plotOutput('IRI_total_thickness_plot'))),
+                       column(4,box(plotOutput('IRI_Tmax_plot')))),
+              fluidRow(column(4,box(plotOutput("IRI_Tmin_plot"))),
+                       column(4,box(plotOutput("IRI_traffic_plot"))))
+             )
+  )
+)
+))

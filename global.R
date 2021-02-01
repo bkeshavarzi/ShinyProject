@@ -70,3 +70,6 @@ df_IRI=df_IRI %>% group_by(STATE_CODE,STATE_CODE_EXP,SHRP_ID) %>% arrange(VISIT_
 df_IRI=df_IRI %>% select(STATE_CODE,STATE_CODE_EXP,SHRP_ID,VISIT_DATE,CONSTRUCTION_NO,IRI_ave)
 df_IRI=df_IRI %>% group_by(STATE_CODE,STATE_CODE_EXP,SHRP_ID,VISIT_DATE,CONSTRUCTION_NO) %>% summarise(IRI=mean(IRI_ave),Date=min(VISIT_DATE))
 df_IRI=df_IRI %>% filter(!is.na(IRI))
+
+IRI_state=sort(unique(df_IRI$STATE_CODE_EXP))
+IRI_shrp=unique((df_IRI %>% filter(STATE_CODE_EXP=='Alabama') %>% select(SHRP_ID))[,1])

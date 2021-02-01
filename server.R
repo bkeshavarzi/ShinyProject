@@ -41,6 +41,15 @@ shinyServer(function(input, output,session){
     updateSelectizeInput(session ,"ESAL_year",choices = x,selected = x[1])
   
   })
+  
+  observe({
+    
+    
+    df=df_IRI %>% filter(STATE_CODE_EXP==input$IRI_state_1)
+    x=sort(unique(df$SHRP_ID))
+    updateSelectizeInput(session ,"IRI_shrp",choices = x,selected = x[1])
+    
+  })
     
     # show histogram for thickness
     
@@ -232,22 +241,56 @@ shinyServer(function(input, output,session){
       
     }))
     
+    output$IRI_time_plot <-renderPlot({
+      
+      df=df_IRI %>% filter(STATE_CODE_EXP==input$IRI_state_1&SHRP_ID==input$IRI_shrp) %>% select(Date,CONSTRUCTION_NO,IRI)
+      min_date=min(df$Date)
+      df$day=as.integer(df$Date-min_date)
+      
+      ggplot(df)+geom_point(aes(x=day,y=IRI,color=factor(df$CONSTRUCTION_NO),size=5))+
+      geom_line(aes(x=day,y=IRI),color='black',linetype='dashed')+
+      labs(title=paste('IRI Variation for State',input$IRI_state_1, 'SHRP id :',input$IRI_shrp,sep = ' '),
+      caption=('Data from LTPP'),tag='Figure 1',x='Day after first Construction',y='IRI',color='Construction No')+theme_bw()+
+      scale_x_continuous(breaks = seq(0,max(df$day),length.out=10))+
+      theme(axis.text.x = element_text(face="bold", color="#993333",size=12))+theme(axis.text.y = element_text(face="bold", color="#993333",size=12))+
+      theme(axis.title = element_text(size = 14,color='#121111',face='bold'))
+      
+    })
+    
+    output$IRI-temp_plot <-renderPlot({
+      
+      df1=df_IRI %>% filter(STATE_CODE_EXP==input$IRI_state_2) %>% select(Date,CONSTRUCTION_NO,SHRP_ID,IRI)
+      df2=df1 %>% group_by(SHRP_ID) %>% summarise(min_year=min(Date),max_year=max(Date))
+      
+      df1$day=NA
+     
+      for (ishrp in unique(df1$SHRP_ID)) {
+        
+        df1[df1$SHRP_ID==ishrp,'day']$day=as.integer(df1[df1$SHRP_ID==ishrp,'Date']$Date-min(df1[df1$SHRP_ID==ishrp,'Date']$Date))
+        
+      }
+      
+      df1$survey_date=format(df1$VISIT_DATE,'%Y')
+      
+      df3= df1 %>% group_by(SHRP_ID,survey_date) %>% summarise(max_IRI=max(IRI))
+      
+      df4=df_temperature %>% filter(STATE_CODE_EXP==input$IRI_state_2) %>% group_by(SHRP_ID,YEAR) %>% summarise(Tave=mean(Tave_F))
+      
+      df5=inner_join(df3,df4,by=c('SHRP_ID'='SHRP_ID','survey_date'='YEAR'))
+      
+      ggplot(df5) + geom_point(aes(x=Tave,y=max_IRI,color=factor(SHRP_ID)),size=3) +
+      geom_line(aes(x=Tave,y=max_IRI,color=factor(SHRP_ID)),linetype='dashed')+
+      labs(title=paste('IRI Evolution for State',input$IRI_state_2,'as a function of Annual Average Temperature',sep = ' '),
+      caption=('Data from LTPP'),tag='Figure 2',x='Temperature (F)',y='IRI',color='SHRP ID')+theme_bw()+
+      theme(axis.text.x = element_text(face="bold", color="#993333",size=12))+theme(axis.text.y = element_text(face="bold", color="#993333",size=12))+
+      theme(axis.title = element_text(size = 14,color='#121111',face='bold'))
+    
+    })
     
     
     
     
     
-    
-    
-    # show scater plot for ac layer as a function of traffic
-    #output$Traffic_AC_Thickness <-renderPlot({
-        #df_traffic_shrp=df_traffic %>% filter(STATE_CODE_EXP==input$state2 & SHRP_ID==input$SHRP) %>% select(!STATE_CODE & !STATE_CODE_EXP & !SHRP_ID) %>% 
-            #group_by(CONSTRUCTION_NO) %>% summarise(min_ESAL=min(ESAL),max_ESAL=max(ESAL))
-        #df_pavement_state_layer_shrp=df_pavement_info %>% filter(STATE_CODE_EXP==input$state2 & SHRP_ID==input$SHRP  & LAYER_TYPE=="AC") %>% 
-            #select(!STATE_CODE_EXP & !SHRP_ID & !LAYER_TYPE & !LAYER_NO & !LAYER_TYPE & !LAYER_TYPE_EXP) %>% group_by(CONSTRUCTION_NO) %>% summarise(st=sum(REPR_THICKNESS))
-        #df_final=inner_join(df_pavement_state_layer_shrp,df_traffic_shrp,by="CONSTRUCTION_NO")
-        #ggplot(df_final)+geom_point(aes(x=st,y=min_ESAL))+geom_point(aes(x=st,y=max_ESAL))+labs(title = "ESAL vs. Thickness for Aspahlt")+xlab("Thickness (in)")+ylab("ESAL")
-    #})
     
 })
 
