@@ -259,29 +259,33 @@ shinyServer(function(input, output,session){
     
     output$IRI-temp_plot <-renderPlot({
       
-      df1=df_IRI %>% filter(STATE_CODE_EXP==input$IRI_state_2) %>% select(Date,CONSTRUCTION_NO,SHRP_ID,IRI)
-      df2=df1 %>% group_by(SHRP_ID) %>% summarise(min_year=min(Date),max_year=max(Date))
+      df1=df_IRI %>% filter(STATE_CODE_EXP==input$IRI_state_2) %>% select(Date,CONSTRUCTION_NO,SHRP_ID,IRI) %>% filter(CONSTRUCTION_NO==1)
       
-      df1$day=NA
-     
+      df1$delta_year=0
+      df1$delta_IRI=0
+      
       for (ishrp in unique(df1$SHRP_ID)) {
         
-        df1[df1$SHRP_ID==ishrp,'day']$day=as.integer(df1[df1$SHRP_ID==ishrp,'Date']$Date-min(df1[df1$SHRP_ID==ishrp,'Date']$Date))
+        min_IRI=min(df1[df1$SHRP_ID==ishrp,'IRI']$IRI)
+        min_date=as.integer(format(min(df1[df1$SHRP_ID==ishrp,'VISIT_DATE']$VISIT_DATE),'%Y'))
+        survey_year=as.integer(format(df1[df1$SHRP_ID==ishrp,'VISIT_DATE']$VISIT_DATE,'%Y'))
+    
+        df1[df1$SHRP_ID==ishrp,'delta_year']$delta_year=as.integer(survey_year-min_date)
+        df1[df1$SHRP_ID==ishrp,'delta_IRI']$delta_IRI=(df1[df1$SHRP_ID==ishrp,'IRI']$IRI-min_IRI)
         
       }
       
-      df1$survey_date=format(df1$VISIT_DATE,'%Y')
+      df1$survey_year=as.integer(format(df1$VISIT_DATE,'%Y'))
+      df1=df1 %>% group_by(SHRP_ID,survey_year) %>% summarise(dIRI=max(delta_IRI),dyear=min(delta_year))
+      df2=df_temperature %>% filter(STATE_CODE_EXP==input$IRI_state_2) %>% group_by(SHRP_ID,YEAR) %>% summarise(Tave=mean(Tave_F))
       
-      df3= df1 %>% group_by(SHRP_ID,survey_date) %>% summarise(max_IRI=max(IRI))
+      df3=inner_join(df1,df2,by=c('SHRP_ID'='SHRP_ID','survey_year'='YEAR'))
       
-      df4=df_temperature %>% filter(STATE_CODE_EXP==input$IRI_state_2) %>% group_by(SHRP_ID,YEAR) %>% summarise(Tave=mean(Tave_F))
+      ggplot(df3)+geom_boxplot(aes(x=dyear,y=dIRI,group=dyear))+
+      geom_point(aes(x=dyear,y=dIRI,color=Tave),size=1)+scale_color_gradient(low="blue", high="red")+
       
-      df5=inner_join(df3,df4,by=c('SHRP_ID'='SHRP_ID','survey_date'='YEAR'))
-      
-      ggplot(df5) + geom_point(aes(x=Tave,y=max_IRI,color=factor(SHRP_ID)),size=3) +
-      geom_line(aes(x=Tave,y=max_IRI,color=factor(SHRP_ID)),linetype='dashed')+
       labs(title=paste('IRI Evolution for State',input$IRI_state_2,'as a function of Annual Average Temperature',sep = ' '),
-      caption=('Data from LTPP'),tag='Figure 2',x='Temperature (F)',y='IRI',color='SHRP ID')+theme_bw()+
+      caption=('Data from LTPP'),tag='Figure 2',x='Temperature (F)',y='IRI')+theme_bw()+
       theme(axis.text.x = element_text(face="bold", color="#993333",size=12))+theme(axis.text.y = element_text(face="bold", color="#993333",size=12))+
       theme(axis.title = element_text(size = 14,color='#121111',face='bold'))
     
