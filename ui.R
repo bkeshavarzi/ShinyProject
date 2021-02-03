@@ -67,13 +67,13 @@ shinyUI(dashboardPage(
               
               fluidRow(column(3,box(selectInput('IRI_state_2','Select State :',IRI_state,selected=IRI_state[1])))),
               
-              fluidRow(column(4,box(plotOutput('IRI-temp_plot'))),
+              fluidRow(column(4,box(plotOutput('IRI_temp_plot'))),
                        column(4,box(plotOutput('IRI_traffic_plot')))),
                        
               fluidrow(column(4,box(plotOutput('IRI_Ac_thickness_plot'))),
-                       column(4,box(plotOutput('IRI_total_thickness_plot'))),
-                       column(4,box(plotOutput('IRI_Tmax_plot')))),
-              fluidRow(column(4,box(plotOutput("IRI_Tmin_plot"))),
+                       column(4,box(plotOutput('IRI_total_thickness_plot')))),
+                       #column(4,box(plotOutput('IRI_Tmax_plot')))),
+              fluidRow(column(4,box(plotOutput("IRI_Tave_plot"))),
                        column(4,box(plotOutput("IRI_traffic_plot"))))
              )
   )

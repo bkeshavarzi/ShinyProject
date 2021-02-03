@@ -257,7 +257,7 @@ shinyServer(function(input, output,session){
       
     })
     
-    output$IRI-temp_plot <-renderPlot({
+    output$IRI_temp_plot <-renderPlot({
       
       df1=df_IRI %>% filter(STATE_CODE_EXP==input$IRI_state_2) %>% select(Date,CONSTRUCTION_NO,SHRP_ID,IRI) %>% filter(CONSTRUCTION_NO==1)
       
@@ -291,9 +291,145 @@ shinyServer(function(input, output,session){
     
     })
     
+    output$IRI_traffic_plot <- renderPlot({
+      
+      df1=df_IRI %>% filter(STATE_CODE_EXP==input$IRI_state_2) %>% select(Date,CONSTRUCTION_NO,SHRP_ID,IRI) %>% filter(CONSTRUCTION_NO==1)
+      
+      df1$delta_year=0
+      df1$delta_IRI=0
+      
+      for (ishrp in unique(df1$SHRP_ID)) {
+        
+        min_IRI=min(df1[df1$SHRP_ID==ishrp,'IRI']$IRI)
+        min_date=as.integer(format(min(df1[df1$SHRP_ID==ishrp,'VISIT_DATE']$VISIT_DATE),'%Y'))
+        survey_year=as.integer(format(df1[df1$SHRP_ID==ishrp,'VISIT_DATE']$VISIT_DATE,'%Y'))
+        
+        df1[df1$SHRP_ID==ishrp,'delta_year']$delta_year=as.integer(survey_year-min_date)
+        df1[df1$SHRP_ID==ishrp,'delta_IRI']$delta_IRI=(df1[df1$SHRP_ID==ishrp,'IRI']$IRI-min_IRI)
+        
+      }
+      
+      df1$survey_year=as.integer(format(df1$VISIT_DATE,'%Y'))
+      df1=df1 %>% group_by(SHRP_ID,survey_year) %>% summarise(dIRI=max(delta_IRI),dyear=min(delta_year))
+      df2=df_traffic %>% filter(STATE_CODE_EXP==input$IRI_state_2) %>% filter(CONSTRUCTION_NO==1) %>% select(SHRP_ID,YEAR,ESAL)
+      df3=inner_join(df1,df2,by=c('SHRP_ID'='SHRP_ID','survey_year'='YEAR'))
+      
+      ggplot(df3,aes(x=dyear,y=dIRI))+geom_boxplot(aes(group=dyear))+geom_point(aes(color=ESAL))+
+      scale_color_gradient(low="blue", high="red") +
+      labs(title=paste('IRI Evolution for State',input$IRI_state_2,'as a function of ESAL',sep = ' '),
+      caption=('Data from LTPP'),tag='Figure 1',x='ESAL',y='IRI')+theme_bw()+
+      theme(axis.text.x = element_text(face="bold", color="#993333",size=12))+theme(axis.text.y = element_text(face="bold", color="#993333",size=12))+
+      theme(axis.title = element_text(size = 14,color='#121111',face='bold'))
+      
+    })
+    
+    output$IRI_Ac_thickness_plot <- renderPlot({
+      
+      df1=df_IRI %>% filter(STATE_CODE_EXP==input$IRI_state_2) %>% select(Date,CONSTRUCTION_NO,SHRP_ID,IRI) %>% filter(CONSTRUCTION_NO==1)
+        
+      df1$delta_year=0
+      df1$delta_IRI=0
+      
+      for (ishrp in unique(df1$SHRP_ID)) {
+        
+        min_IRI=min(df1[df1$SHRP_ID==ishrp,'IRI']$IRI)
+        min_date=as.integer(format(min(df1[df1$SHRP_ID==ishrp,'VISIT_DATE']$VISIT_DATE),'%Y'))
+        survey_year=as.integer(format(df1[df1$SHRP_ID==ishrp,'VISIT_DATE']$VISIT_DATE,'%Y'))
+        
+        df1[df1$SHRP_ID==ishrp,'delta_year']$delta_year=as.integer(survey_year-min_date)
+        df1[df1$SHRP_ID==ishrp,'delta_IRI']$delta_IRI=(df1[df1$SHRP_ID==ishrp,'IRI']$IRI-min_IRI)
+        
+      }
+      
+      df1$survey_year=as.integer(format(df1$VISIT_DATE,'%Y'))
+      df1=df1 %>% group_by(SHRP_ID,survey_year) %>% summarise(dIRI=max(delta_IRI),dyear=min(delta_year))
+      
+      df2=df_pavement_info %>% filter(STATE_CODE_EXP==input$IRI_state_2&CONSTRUCTION_NO==1&LAYER_TYPE=='AC') %>% 
+        group_by(SHRP_ID) %>% summarise(ac_th=sum(REPR_THICKNESS))
+      
+      df3=inner_join(df1,df2,by='SHRP_ID')
+      
+      ggplot(df3,aes(x=dyear,y=IRI_ac_th))+geom_boxplot(aes(group=dyear))+geom_point(aes(color=ac_th))+
+      scale_color_gradient(low="blue", high="red") +
+      labs(title=paste('(IRI/AC Layer Thickness) Evolution for State',input$IRI_state_2,sep = ' '),
+      caption=('Data from LTPP'),tag='Figure 2',x='ESAL',y='IRI')+theme_bw()+
+      theme(axis.text.x = element_text(face="bold", color="#993333",size=12))+theme(axis.text.y = element_text(face="bold", color="#993333",size=12))+
+      theme(axis.title = element_text(size = 14,color='#121111',face='bold'))
+      
+    })
+    
+    output$IRI_total_thickness_plot <- renderPlot({
+      
+      
+      df1=df_IRI %>% filter(STATE_CODE_EXP==input$IRI_state_2) %>% select(Date,CONSTRUCTION_NO,SHRP_ID,IRI) %>% filter(CONSTRUCTION_NO==1)
+      
+      df1$delta_year=0
+      df1$delta_IRI=0
+      
+      for (ishrp in unique(df1$SHRP_ID)) {
+        
+        min_IRI=min(df1[df1$SHRP_ID==ishrp,'IRI']$IRI)
+        min_date=as.integer(format(min(df1[df1$SHRP_ID==ishrp,'VISIT_DATE']$VISIT_DATE),'%Y'))
+        survey_year=as.integer(format(df1[df1$SHRP_ID==ishrp,'VISIT_DATE']$VISIT_DATE,'%Y'))
+        
+        df1[df1$SHRP_ID==ishrp,'delta_year']$delta_year=as.integer(survey_year-min_date)
+        df1[df1$SHRP_ID==ishrp,'delta_IRI']$delta_IRI=(df1[df1$SHRP_ID==ishrp,'IRI']$IRI-min_IRI)
+        
+      }
+      
+      df1$survey_year=as.integer(format(df1$VISIT_DATE,'%Y'))
+      df1=df1 %>% group_by(SHRP_ID,survey_year) %>% summarise(dIRI=max(delta_IRI),dyear=min(delta_year))
+      
+      df2=df_pavement_info %>% filter(STATE_CODE_EXP==input$IRI_state_2&CONSTRUCTION_NO==1) %>% 
+      group_by(SHRP_ID) %>% summarise(t_th=sum(REPR_THICKNESS))
+      
+      df3=inner_join(df1,df2,by='SHRP_ID')
+      
+      ggplot(df3,aes(x=dyear,y=IRI_ac_th))+geom_boxplot(aes(group=dyear))+geom_point(aes(color=t_th))+
+      scale_color_gradient(low="blue", high="red") +
+      labs(title=paste('(IRI/total Layer Thickness) Evolution for State',input$IRI_state_2,sep = ' '),
+      caption=('Data from LTPP'),tag='Figure 3',x='ESAL',y='IRI')+theme_bw()+
+      theme(axis.text.x = element_text(face="bold", color="#993333",size=12))+theme(axis.text.y = element_text(face="bold", color="#993333",size=12))+
+      theme(axis.title = element_text(size = 14,color='#121111',face='bold'))
+      
+    })
+    
+    output$IRI_Tave_plot <- renderPlot({
+      
+      df1=df_IRI %>% filter(STATE_CODE_EXP==input$IRI_state_2) %>% select(Date,CONSTRUCTION_NO,SHRP_ID,IRI) %>% filter(CONSTRUCTION_NO==1)
+      
+      df1$delta_year=0
+      df1$delta_IRI=0
+      
+      for (ishrp in unique(df1$SHRP_ID)) {
+        
+        min_IRI=min(df1[df1$SHRP_ID==ishrp,'IRI']$IRI)
+        min_date=as.integer(format(min(df1[df1$SHRP_ID==ishrp,'VISIT_DATE']$VISIT_DATE),'%Y'))
+        survey_year=as.integer(format(df1[df1$SHRP_ID==ishrp,'VISIT_DATE']$VISIT_DATE,'%Y'))
+        
+        df1[df1$SHRP_ID==ishrp,'delta_year']$delta_year=as.integer(survey_year-min_date)
+        df1[df1$SHRP_ID==ishrp,'delta_IRI']$delta_IRI=(df1[df1$SHRP_ID==ishrp,'IRI']$IRI-min_IRI)
+        
+      }
+      
+      df1$survey_year=as.integer(format(df1$VISIT_DATE,'%Y'))
+      df1=df1 %>% group_by(SHRP_ID,survey_year) %>% summarise(dIRI=max(delta_IRI),dyear=min(delta_year))
+      
+      df2=df_temperature %>% filter(STATE_CODE_EXP==input$IRI_state_2) %>% group_by(SHRP_ID,YEAR) %>% summarise(Tave=mean(Tave_F))
+      df3=inner_join(df1,df2,by=c('SHRP_ID'='SHRP_ID','survey_year'='YEAR'))
+      
+      ggplot(df3,aes(x=dyear,y=dIRI))+geom_boxplot(aes(group=dyear))+geom_point(aes(color=Tave))+
+      scale_color_gradient(low="blue", high="red") +
+      labs(title=paste('(IRI/Average Anuual Temperature) Evolution for State',input$IRI_state_2,sep = ' '),
+      caption=('Data from LTPP'),tag='Figure 4',x='ESAL',y='IRI')+theme_bw()+
+      theme(axis.text.x = element_text(face="bold", color="#993333",size=12))+theme(axis.text.y = element_text(face="bold", color="#993333",size=12))+
+      theme(axis.title = element_text(size = 14,color='#121111',face='bold'))
+      
+      
+    })
     
     
-    
+    output$IRI_Tave_plot <- renderPlot({
     
     
 })
