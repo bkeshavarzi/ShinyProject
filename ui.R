@@ -11,7 +11,7 @@ shinyUI(dashboardPage(
       menuItem("Pavement Sections Database", tabName = "section_data"  , icon = icon("database")),
       menuItem("Temperature"  , tabName = "temperature_data", icon = icon("thermometer-0")),
       menuItem("Traffic",tabName = 'traffic_data',icon = icon('truck')),
-      menuItem('Performance',tabname='performance_data',icon=icon('chain-broken'))
+      menuItem('Performance',tabName='performance_data',icon=icon('chain-broken'))
     )),
   
   dashboardBody(
@@ -57,24 +57,25 @@ shinyUI(dashboardPage(
                        
                        #box(selectInput('traffic_year','Year :',traffic_year,selected = traffic_year[1],multiple = TRUE)))),
       
-      tabItem(tabname='IRI_data',
+      tabItem(tabName = 'performance_data',
               
-              fluidRow(column(3,box(selectInput('IRI_state_1','Select State :',IRI_state,selected=IRI_state[1]))),
-                       column(3,box(selectInput('IRI_shrp','Select SHRP ID:',IRI_shrp,selected=IRI_shrp[1])))),
+              fluidRow(column(6,box(selectInput('IRI_state_1','Select State :',IRI_state,selected=IRI_state[1]))),
+                       column(6,box(selectInput('IRI_shrp','Select SHRP ID:',IRI_shrp,selected=IRI_shrp[1])))),
               
-              fluidRow(column(4,box(plotOutput('IRI_time_plot')))),
+              fluidRow(column(12,box(plotOutput('IRI_time_plot')))),
               
               
-              fluidRow(column(3,box(selectInput('IRI_state_2','Select State :',IRI_state,selected=IRI_state[1])))),
+              fluidRow(column(6,box(selectInput('IRI_state_2','Select State :',IRI_state,selected=IRI_state[1])))),
               
-              fluidRow(column(4,box(plotOutput('IRI_temp_plot'))),
-                       column(4,box(plotOutput('IRI_traffic_plot')))),
+              
+              fluidRow(column(12,box(plotOutput('IRI_temp_plot')))),
+              fluidRow(column(12,box(plotOutput('IRI_traffic_plot')))),
                        
-              fluidrow(column(4,box(plotOutput('IRI_Ac_thickness_plot'))),
-                       column(4,box(plotOutput('IRI_total_thickness_plot')))),
-                       #column(4,box(plotOutput('IRI_Tmax_plot')))),
-              fluidRow(column(4,box(plotOutput("IRI_Tave_plot"))),
-                       column(4,box(plotOutput("IRI_traffic_plot"))))
+              fluidRow(column(12,box(plotOutput('IRI_Ac_thickness_plot')))),
+                       
+              fluidRow(column(12,box(plotOutput("IRI_Tave_plot")))),
+              fluidRow(column(12,box(plotOutput("IRI_th_traffic_plot"))))
+              
              )
   )
 )

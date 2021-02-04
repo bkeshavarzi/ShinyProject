@@ -72,4 +72,4 @@ df_IRI=df_IRI %>% group_by(STATE_CODE,STATE_CODE_EXP,SHRP_ID,VISIT_DATE,CONSTRUC
 df_IRI=df_IRI %>% filter(!is.na(IRI))
 
 IRI_state=sort(unique(df_IRI$STATE_CODE_EXP))
-IRI_shrp=unique((df_IRI %>% filter(STATE_CODE_EXP=='Alabama') %>% select(SHRP_ID))[,1])
+IRI_shrp=unique((df_IRI %>% filter(STATE_CODE_EXP=='Alabama') %>% select(SHRP_ID))[,4])
