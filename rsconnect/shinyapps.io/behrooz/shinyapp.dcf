@@ -1,0 +1,10 @@
+name: shinyapp
+title:
+username:
+account: behrooz
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3589856
+bundleId: 4185828
+url: https://behrooz.shinyapps.io/shinyapp/
+when: 1612547264.54739
