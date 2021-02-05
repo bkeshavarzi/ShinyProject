@@ -11,7 +11,8 @@ shinyUI(dashboardPage(
       menuItem("Pavement Sections Database", tabName = "section_data"  , icon = icon("database")),
       menuItem("Temperature"  , tabName = "temperature_data", icon = icon("thermometer-0")),
       menuItem("Traffic",tabName = 'traffic_data',icon = icon('truck')),
-      menuItem('Performance',tabName='performance_data',icon=icon('chain-broken'))
+      menuItem('Performance',tabName='performance_data',icon=icon('chain-broken')),
+      menuItem('Fatigue Cracking',tabName = 'fatigue_data',icon=icon('house-damage'))
     )),
   
   dashboardBody(
@@ -74,9 +75,4 @@ shinyUI(dashboardPage(
               fluidRow(column(12,box(plotOutput('IRI_Ac_thickness_plot')))),
                        
               fluidRow(column(12,box(plotOutput("IRI_Tave_plot")))),
-              fluidRow(column(12,box(plotOutput("IRI_th_traffic_plot"))))
-              
-             )
-  )
-)
-))
+              fluidRow(column

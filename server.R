@@ -36,6 +36,15 @@ shinyServer(function(input, output,session){
     updateSelectizeInput(session ,"IRI_shrp",choices = x,selected = x[1])
 
   })
+  
+  observe({
+    
+    
+    df=df_cracking %>% filter(STATE==input$crack_state)
+    x=sort(unique(df$SHRP))
+    updateSelectizeInput(session ,"crack_shrp",choices = x,selected = x[1])
+    
+  })
     
     # show histogram for thickness
     
@@ -51,7 +60,9 @@ shinyServer(function(input, output,session){
         ggplot(df_state_layer,aes(x=sum_),fill=CN)+
         geom_histogram(bins=input$thickness_histogram_slider,position = "stack")+labs(title=paste(input$layer_type_data,'Thickness Distributation For',input$state_section_data,sep=' '),
         subtitle = paste(as.character(min_year),as.character(max_year),sep='-'),caption='Data from LTPP',tag='Figure 1',x=paste(input$layer_type_data,'Layer Thickness (in)'),y='Frequency',colour = "CN")+
-        theme_bw()+scale_x_continuous(breaks =vec )
+        theme_bw()+theme(axis.text.x = element_text(face="bold", color="#0f0000",size=12))+theme(axis.text.y = element_text(face="bold", color="#0f0000",size=12))+
+          theme(axis.title = element_text(size = 14,color='#121111',face='bold'))+
+          scale_color_gradient(low="blue", high="red")
 
     })
     
@@ -67,7 +78,9 @@ shinyServer(function(input, output,session){
         vec=round(seq(min_duration,max_duration,(max_duration-min_duration)/input$duration_histogram_slider),2)
         ggplot(df_state_duration,aes(x=duration))+geom_histogram(bins = input$duration_histogram_slider)+labs(title=paste('Section Life Distributation','in',input$state_section_data,sep=' '),
         subtitle = paste(as.character(min_year),as.character(max_year),sep='-'),caption='Data from LTPP',tag='Figure 2',x='Section Life (Year)',y='Frequency')+
-        theme_bw()+scale_x_continuous(breaks = )
+        theme_bw()+theme(axis.text.x = element_text(face="bold", color="#0f0000",size=12))+theme(axis.text.y = element_text(face="bold", color="#0f0000",size=12))+
+          theme(axis.title = element_text(size = 14,color='#121111',face='bold'))+
+          scale_color_gradient(low="blue", high="red")
 
     })
     # 
@@ -85,7 +98,9 @@ shinyServer(function(input, output,session){
         ggplot(df_gps_state,aes(ELEVATION))+geom_histogram(bins = input$elevation_histogram_slider)+labs(title = paste('Section Elevation in',input$state_section_data,sep = ' '),
         subtitle = paste(as.character(min_year),as.character(max_year),sep='-'),
         caption='Data from LTPP',tag='Figure 3',x='Elevation (ft)',y='Frequency')+
-        theme_bw()+scale_x_continuous(breaks = vec)
+        theme_bw()+theme(axis.text.x = element_text(face="bold", color="#0f0000",size=12))+theme(axis.text.y = element_text(face="bold", color="#0f0000",size=12))+
+          theme(axis.title = element_text(size = 14,color='#121111',face='bold'))+
+          scale_color_gradient(low="blue", high="red")
 
     })
     # 
@@ -126,8 +141,9 @@ shinyServer(function(input, output,session){
          labs(title=paste('Annual Average Temperature for',input$temperature_state,sep = ' '),
          caption=('Data from LTPP'),tag='Figure 1',x='Year',y='Temperature (F)')+theme_bw()+scale_x_continuous(breaks = seq(min(df_ave_temperature_year$YEAR),max(df_ave_temperature_year$YEAR),3))+
 
-         theme(axis.text.x = element_text(face="bold", color="#993333",size=12))+theme(axis.text.y = element_text(face="bold", color="#993333",size=12))+
-         theme(axis.title = element_text(size = 14,color='#121111',face='bold'))
+           theme(axis.text.x = element_text(face="bold", color="#0f0000",size=12))+theme(axis.text.y = element_text(face="bold", color="#0f0000",size=12))+
+           theme(axis.title = element_text(size = 14,color='#121111',face='bold'))+
+           scale_color_gradient(low="blue", high="red")
 
      })
     # 
@@ -143,8 +159,9 @@ shinyServer(function(input, output,session){
          ggplot(df_ave_temperature_year_month)+geom_boxplot(aes(x=MONTH,y=temp_ave,group=MONTH),fill='#2616b8',color='black')+geom_line(data=df_ave,aes(x=MONTH,y=T_ave),color='red',linetype='dashed')+
          labs(title=paste('Annual Average Temperature for',input$temperature_state,'Year :',input$temperature_year,sep = ' '),
          caption=('Data from LTPP'),tag='Figure 2',x='Month',y='Temperature (F)')+scale_x_discrete(limits=temperature_month_list)+theme_bw()+
-         theme(axis.text.x = element_text(face="bold", color="#993333",size=12))+theme(axis.text.y = element_text(face="bold", color="#993333",size=12))+
-         theme(axis.title = element_text(size = 14,color='#121111',face='bold'))
+           theme(axis.text.x = element_text(face="bold", color="#0f0000",size=12))+theme(axis.text.y = element_text(face="bold", color="#0f0000",size=12))+
+           theme(axis.title = element_text(size = 14,color='#121111',face='bold'))+
+           scale_color_gradient(low="blue", high="red")
 
      })
      # 
@@ -157,8 +174,8 @@ shinyServer(function(input, output,session){
        ggplot(data=df,aes(x=ELEVATION,y=Tave_F))+geom_point(color='red',size=5)+geom_smooth(color='blue',se=TRUE,linetype='dashed',method = 'lm')+
        labs(title=paste('Temperature versus Elevation for State:',input$temperature_state,'Year:',input$temperature_year,'Month:',input$temperature_month,sep=' '),
        caption=('Data from LTPP'),tag='Figure 3',x='Elevation (ft)',y='Temperature (F)')+theme_bw()+
-           theme(axis.text.x = element_text(face="bold", color="#993333",size=12))+theme(axis.text.y = element_text(face="bold", color="#993333",size=12))+
-           theme(axis.title = element_text(size = 14,color='#121111',face='bold'))
+         theme(axis.text.x = element_text(face="bold", color="#0f0000",size=12))+theme(axis.text.y = element_text(face="bold", color="#0f0000",size=12))+
+         theme(axis.title = element_text(size = 14,color='#121111',face='bold'))
      })
     
     # # show map
@@ -174,19 +191,25 @@ shinyServer(function(input, output,session){
       })
       # 
       output$temperature_table1 <- DT::renderDataTable(DT::datatable({
-        df_ave_temperature_year=df_temperature %>% filter(STATE_CODE_EXP==input$temperature_state) %>% group_by(YEAR) %>% summarise(Average_Temperature=round(mean(Tave_F),1))
+        df_ave_temperature_year=df_temperature %>% filter(STATE_CODE_EXP==input$temperature_state) %>% group_by(YEAR) %>% summarise(AT=round(mean(Tave_F),1))
+        df_ave_temperature_year$Temperature=round(df_ave_temperature_year$AT,2)
+        
+        df_ave_temperature_year=df_ave_temperature_year %>% select(YEAR,Temperature)
         df_ave_temperature_year
       }))
       # 
       output$temperature_table2 <- DT::renderDataTable(DT::datatable({
+        
         x=sort(unique((df_temperature %>% filter(STATE_CODE_EXP==input$temperature_state,YEAR==input$temperature_year) %>% select(MONTH))[,1]),decreasing = FALSE)
         x_name=temperature_month_list[x]
 
         df_ave_temperature_year_month=df_temperature %>% filter(STATE_CODE_EXP==input$temperature_state,YEAR==input$temperature_year) %>% group_by(MONTH,SHRP_ID,ELEVATION) %>%
         summarise(temp_ave=mean(Tave_F)) %>% arrange(MONTH)
-        df_ave=df_ave_temperature_year_month %>% group_by(MONTH,SHRP_ID,ELEVATION) %>% summarise(Average_Temperature=round(mean(temp_ave),1))
+        df_ave=df_ave_temperature_year_month %>% group_by(MONTH,SHRP_ID,ELEVATION) %>% summarise(Temperature=round(mean(temp_ave),1))
+        df_ave$ELEVATION=round(df_ave$ELEVATION,2)
+        df_ave=df_ave %>% select(MONTH,SHRP=SHRP_ID,ELEVATION,Temperature)
         df_ave
-
+        
       }))
     
     #show traffic year growth as a function of year
@@ -196,7 +219,8 @@ shinyServer(function(input, output,session){
         df=df_traffic %>% filter(STATE_CODE_EXP==input$ESAL_state) %>% group_by(YEAR) %>% summarise(ave_ESAL=mean(ESAL))
         ggplot(df)+geom_point(aes(x=YEAR,y=ave_ESAL),color='red',size=5)+geom_line(aes(x=YEAR,y=ave_ESAL),color='blue',linetype='dashed')+
           labs(title = paste('Annual Average Traffic for State:',input$ESAL_state,sep=' '),x='Year',y='ESAL',caption = 'Data from LTPP',tag='Figure 1')+
-          theme_bw()+theme(axis.text.x = element_text(face="bold", color="#993333",size=12))+theme(axis.text.y = element_text(face="bold", color="#993333",size=12))+
+          theme_bw()+
+          theme(axis.text.x = element_text(face="bold", color="#0f0000",size=12))+theme(axis.text.y = element_text(face="bold", color="#0f0000",size=12))+
           theme(axis.title = element_text(size = 14,color='#121111',face='bold'))
 
     })
@@ -207,7 +231,7 @@ shinyServer(function(input, output,session){
       df_ave=df_traffic %>% filter(STATE_CODE_EXP==input$ESAL_state&YEAR==input$ESAL_year) %>% group_by(SHRP_ID) %>% summarise(ave_ESAL=mean(ESAL))
       ggplot(df)+geom_boxplot(aes(x=YEAR,y=ESAL,group=YEAR),fill='#2616b8',color='black')+labs(title = paste('ESAL data for State :',input$ESAL_state,'Year:',input$ESAL_year),x='Year',
       y='ESAL',caption='Data from LTPP',tag='Figure 2')+
-      theme_bw()+theme(axis.text.x = element_text(face="bold", color="#993333",size=12))+theme(axis.text.y = element_text(face="bold", color="#993333",size=12))+
+      theme_bw()+theme(axis.text.x = element_text(face="bold", color="#0f0000",size=12))+theme(axis.text.y = element_text(face="bold", color="#0f0000",size=12))+
       theme(axis.title = element_text(size = 14,color='#121111',face='bold'))
       #+scale_x_discrete(limits=input$ESAL_year)
 
@@ -224,7 +248,10 @@ shinyServer(function(input, output,session){
     output$ESAL_table <- DT::renderDataTable(DT::datatable({
 
       df=df_traffic %>% filter(STATE_CODE_EXP==input$ESAL_state&YEAR==input$ESAL_year) %>% select(SHRP_ID,LATITUDE,LONGITUDE,ELEVATION,ESAL)
-      df
+      df$LATITUDE=round(df$LATITUDE,2)
+      df$LONGITUDE=round(df$LONGITUDE,2)
+      df$ELEVATION=round(df$ELEVATION,2)
+      df=df %>% select(SHRP=SHRP_ID,LATITUDE,LONGITUDE,ELEVATION,ESAL)
 
     }))
     
@@ -271,8 +298,8 @@ shinyServer(function(input, output,session){
       ggplot(df3)+geom_boxplot(aes(x=dyear,y=dIRI,group=dyear))+
       geom_point(aes(x=dyear,y=dIRI,color=Tave),size=3)+scale_color_gradient(low="blue", high="red")+
 
-      labs(title=paste('IRI Evolution for State',input$IRI_state_2,'as a function of Annual Average Temperature',sep = ' '),
-      caption=('Data from LTPP'),tag='Figure 2',x='Year',y='IRI(t)-Minimum IRI')+theme_bw()+
+      labs(title=paste('IRI Evolution for',input$IRI_state_2,sep = ' '),
+      caption=('Data from LTPP'),tag='Figure 2',x='Year after Construction',y='IRI(t)-Minimum IRI')+theme_bw()+
       theme(axis.text.x = element_text(face="bold", color="#0f0000",size=12))+theme(axis.text.y = element_text(face="bold", color="#0f0000",size=12))+
       theme(axis.title = element_text(size = 20,color='#121111',face='bold'))
 
@@ -304,10 +331,10 @@ shinyServer(function(input, output,session){
 
       ggplot(df3,aes(x=dyear,y=dIRI))+geom_boxplot(aes(group=dyear))+geom_point(aes(color=ESAL),size=3)+
       scale_color_gradient(low="blue", high="red") +
-      labs(title=paste('IRI Evolution for ',input$IRI_state_2,'as a function of ESAL',sep = ' '),
-      caption=('Data from LTPP'),tag='Figure 3',x='Year',y='IRI(t)-Minimum IRI')+theme_bw()+
+      labs(title=paste('IRI Evolution for ',input$IRI_state_2,sep = ' '),
+      caption=('Data from LTPP'),tag='Figure 3',x='Year after Construction',y='IRI(t)-Minimum IRI')+theme_bw()+
       theme(axis.text.x = element_text(face="bold", color="#0f0000",size=12))+theme(axis.text.y = element_text(face="bold", color="#0f0000",size=12))+
-      theme(axis.title = element_text(size = 14,color='#121111',face='bold'))
+      theme(axis.title = element_text(size = 20,color='#121111',face='bold'))
 
     })
     # 
@@ -340,10 +367,10 @@ shinyServer(function(input, output,session){
       
       ggplot(df3,aes(x=dyear,y=dIRI_ac))+geom_boxplot(aes(group=dyear))+geom_point(aes(color=AC_Thickness),size=3)+
       scale_color_gradient(low="blue", high="red") +
-      labs(title=paste('(IRI/AC Layer Thickness) Evolution for ',input$IRI_state_2,sep = ' '),
-      caption=('Data from LTPP'),tag='Figure 4',x='Year',y='(IRI(t)-Minimum IRI)/Ac Layer Thickness')+theme_bw()+
+      labs(title=paste('(IRI/AC Layer Thickness) for ',input$IRI_state_2,sep = ' '),
+      caption=('Data from LTPP'),tag='Figure 4',x='Year after Construction',y='(IRI(t)-Minimum IRI)/Ac Layer Thickness')+theme_bw()+
       theme(axis.text.x = element_text(face="bold", color="#0f0000",size=12))+theme(axis.text.y = element_text(face="bold", color="#0f0000",size=12))+
-      theme(axis.title = element_text(size = 14,color='#121111',face='bold'))
+      theme(axis.title = element_text(size = 20,color='#121111',face='bold'))
 
     })
     
@@ -379,10 +406,10 @@ shinyServer(function(input, output,session){
 
       ggplot(df5,aes(x=dyear,y=dIRI_ac))+geom_boxplot(aes(group=dyear))+geom_point(aes(color=Tave),size=3)+
       scale_color_gradient(low="blue", high="red") +
-      labs(title=paste('(IRI/AC Layer Thickness) Evolution for',input$IRI_state_2,sep = ' '),
-      caption=('Data from LTPP'),tag='Figure 5',x='Year',y='(IRI(t)-Minimum IRI)/Ac Layer Thickness')+theme_bw()+
+      labs(title=paste('(IRI/AC Layer Thickness) for',input$IRI_state_2,sep = ' '),
+      caption=('Data from LTPP'),tag='Figure 5',x='Year after Construction',y='(IRI(t)-Minimum IRI)/Ac Layer Thickness')+theme_bw()+
       theme(axis.text.x = element_text(face="bold", color="#0f0000",size=12))+theme(axis.text.y = element_text(face="bold", color="#0f0000",size=12))+
-      theme(axis.title = element_text(size = 14,color='#121111',face='bold'))
+      theme(axis.title = element_text(size = 20,color='#121111',face='bold'))
 
 
     })
@@ -401,32 +428,4 @@ shinyServer(function(input, output,session){
          min_date=as.integer(format(min(df1[df1$SHRP_ID==ishrp,'VISIT_DATE']$VISIT_DATE),'%Y'))
          survey_year=as.integer(format(df1[df1$SHRP_ID==ishrp,'VISIT_DATE']$VISIT_DATE,'%Y'))
          
-         df1[df1$SHRP_ID==ishrp,'delta_year']$delta_year=as.integer(survey_year-min_date)
-         df1[df1$SHRP_ID==ishrp,'delta_IRI']$delta_IRI=(df1[df1$SHRP_ID==ishrp,'IRI']$IRI-min_IRI)
-         
-       }
-       
-       df1$survey_year=as.integer(format(df1$VISIT_DATE,'%Y'))
-       df1=df1 %>% group_by(SHRP_ID,survey_year) %>% summarise(dIRI=max(delta_IRI),dyear=min(delta_year))
-       
-       df2=df_traffic %>% filter(STATE_CODE_EXP==input$IRI_state_2) %>% filter(CONSTRUCTION_NO==1) %>% select(SHRP_ID,YEAR,ESAL)
-       df3=df_pavement_info %>% filter(STATE_CODE_EXP==input$IRI_state_2&CONSTRUCTION_NO==1&LAYER_TYPE=='AC') %>%
-         group_by(SHRP_ID) %>% summarise(ac_th=sum(REPR_THICKNESS))
-       
-       df4=inner_join(df1,df3,by=c('SHRP_ID'='SHRP_ID'))
-       df5=inner_join(df4,df2,by=c('SHRP_ID'='SHRP_ID','survey_year'='YEAR'))
-       df5$dIRI_ac=df5$dIRI/df5$ac_th
-       
-       ggplot(df5,aes(x=dyear,y=dIRI_ac))+geom_boxplot(aes(group=dyear))+geom_point(aes(color=ESAL),size=3)+
-       scale_color_gradient(low="blue", high="red") +
-       labs(title=paste('(IRI/AC Layer Thickness) Evolution for',input$IRI_state_2,sep = ' '),
-       caption=('Data from LTPP'),tag='Figure 6',x='Year',y='(IRI(t)-Minimum IRI)/Ac Layer Thickness')+theme_bw()+
-       theme(axis.text.x = element_text(face="bold", color="#0f0000",size=12))+theme(axis.text.y = element_text(face="bold", color="#0f0000",size=12))+
-       theme(axis.title = element_text(size = 14,color='#121111',face='bold'))
-       
-     
-     })
-    
-})
-
-    
+ 
